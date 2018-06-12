@@ -1,0 +1,17 @@
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- These settings headers are only used on tablets. -->
+
+    <header android:fragment="pt.ul.fc.di.lasige.a4tvapp.Settings$DataSyncPreferenceFragment"
+        android:title="Conexão à TV" android:icon="@drawable/ic_sync_black_24dp" />
+
+    <header android:fragment="pt.ul.fc.di.lasige.a4tvapp.Settings$TTSPreferenceFragment"
+        android:title="Preferências de Feedback Auditivo" android:icon="@drawable/ic_notifications_black_24dp" />
+
+    <header android:fragment="pt.ul.fc.di.lasige.a4tvapp.Settings$GesturePreferenceFragment"
+        android:title="Preferências de Gestos de Navegação" android:icon="@drawable/ic_nav_black" />
+
+    <header android:fragment="pt.ul.fc.di.lasige.a4tvapp.Settings$DataStoragePreferenceFragment"
+        android:title="Apagar Dados de Monitorização" android:icon="@drawable/ic_info_black_24dp" />
+
+</preference-headers>
