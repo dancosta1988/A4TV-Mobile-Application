@@ -376,6 +376,22 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
                     sr.startListening(recognizerIntent);
                 }
             }
+
+            public void onPinchIn(){
+                System.err.println("Pinch in");
+                if(recognizerIntent != null) {
+                    storing.addAction("localize", "-", "-" , "-" ,"screen_gesture", readingMode+"."+focusMode, interactMode+"");
+                    localize();
+                }
+            }
+
+            public void onPinchOut(){
+                System.err.println("Pinch out");
+                if(recognizerIntent != null) {
+                    storing.addAction("read_screen", "-", "-" , "-" ,"screen_gesture", readingMode+"."+focusMode, interactMode+"");
+                    readScreen();
+                }
+            }
         };
         touch_view.setOnTouchListener(touch);
 

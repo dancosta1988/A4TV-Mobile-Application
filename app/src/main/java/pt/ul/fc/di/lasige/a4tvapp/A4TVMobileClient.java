@@ -711,6 +711,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                 System.err.println("State has a localize already.");
                 ttsQueue.addAll(states.get(currentStateIndex).getLocalizeOutput());
                 focusedDesc.addAll(states.get(currentStateIndex).getFocusedDescriptions());
+
             } else {
                 System.err.println("State does not have localize output.");
                 ArrayList<String> elemId = uimlParser.getPartsWithClass("All");
@@ -965,13 +966,14 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
 
                 if (ttsQueue.size() > 0 && currentStateIndex > states.size()) {
                     states.get(currentStateIndex).setReadScreenOutput(ttsQueue);
-                    sendToSpeaker();
+                    //sendToSpeaker();
                 }
             }else{
                 ttsQueue.add("Não existe informação sobre a interface neste momento.");
-                sendToSpeaker();
+                //sendToSpeaker();
             }
         }
+        sendToSpeaker();
     }
 
 
