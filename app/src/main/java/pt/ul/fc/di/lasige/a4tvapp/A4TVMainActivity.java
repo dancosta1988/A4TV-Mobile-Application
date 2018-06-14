@@ -16,6 +16,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Menu;
@@ -42,6 +43,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
     private final int CHECK_CODE = 0x1;
     private final int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 101;
     private final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 102;
+
     private Speaker speaker;
     private A4TVMobileClient mobileClient;
     private A4TVAdaptationAndTutorialDialogs dialogs;
@@ -64,6 +66,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
     private int normalizationPitch, normalizationYaw;
     private int counter = 0;
     private Pose _pose;
+    private GestureDetector mGestureDetector;
     private View touch_view;
     private View.OnTouchListener touch;
     private Vibrator myVib;
@@ -289,7 +292,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
                 }
             }
         });
-        btnConnect.setOnTouchListener(this);
+        //btnConnect.setOnTouchListener(this);
         //Speech recognizer
         int permissionCheck = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.RECORD_AUDIO);
@@ -335,8 +338,8 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
         }
 
         //touch screen gestures
-        touch_view = (View)findViewById(R.id.touch_view_tests); //before touchView
-        touch = new OnSwipeTouchListener(A4TVMainActivity.this) {
+        // Create an object of our Custom Gesture Detector Class
+        A4TVGestureListener customGestureDetector = new A4TVGestureListener(){
             public void onSwipeRight() {
                 System.err.println("Swipe Right");
                 storing.addAction("right","-", "-" , "-" , "screen_gesture", readingMode+"."+focusMode, interactMode+"");
@@ -377,22 +380,36 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
                 }
             }
 
-            public void onPinchIn(){
-                System.err.println("Pinch in");
+            public void onSingleTap(){
+                System.err.println("SingleTap");
                 if(recognizerIntent != null) {
                     storing.addAction("localize", "-", "-" , "-" ,"screen_gesture", readingMode+"."+focusMode, interactMode+"");
                     localize();
                 }
             }
 
-            public void onPinchOut(){
-                System.err.println("Pinch out");
+            public void onScrollDown(){
+                System.err.println("ScrollDown");
+                /*
                 if(recognizerIntent != null) {
                     storing.addAction("read_screen", "-", "-" , "-" ,"screen_gesture", readingMode+"."+focusMode, interactMode+"");
                     readScreen();
-                }
+                }*/
             }
         };
+        // Create a GestureDetector
+        mGestureDetector = new GestureDetector(this, customGestureDetector);
+        // Attach listeners that'll be called for double-tap and related gestures
+        mGestureDetector.setOnDoubleTapListener(customGestureDetector);
+        touch = new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, final MotionEvent event) {
+                mGestureDetector.onTouchEvent(event);
+                return true;
+            }
+
+        };
+        touch_view = (View)findViewById(R.id.touch_view_tests); //before touchView
         touch_view.setOnTouchListener(touch);
 
 
@@ -434,6 +451,8 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
         Thread probe = new Thread(new DiscoverSTBAddress(this));
         probe.start();
     }
+
+
 
     private void deleteStorage(){
         System.err.println( "Deleting storage ... ");
