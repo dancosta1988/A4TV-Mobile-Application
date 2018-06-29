@@ -22,7 +22,7 @@ import java.util.UUID;
  * Created by LaSIGE on 12/09/2017.
  */
 
-public class StoreAndAnalyzeUserBehaviour extends SQLiteOpenHelper {
+public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
     // All Static variables
     // Database Version
@@ -45,7 +45,10 @@ public class StoreAndAnalyzeUserBehaviour extends SQLiteOpenHelper {
     private static final String KEY_ITEM_INDEX = "item_index";
     private static final String KEY_DATE = "DATE";
 
-    public StoreAndAnalyzeUserBehaviour(Context context) {
+    private int NumberOfErrors = 0;
+
+
+    public A4TVUserInterfaceEventManager(Context context) {
 
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
             try {
@@ -54,7 +57,10 @@ public class StoreAndAnalyzeUserBehaviour extends SQLiteOpenHelper {
             }catch(Exception e){
 
             }
+
     }
+
+    //------------------------ Storing User Interface Events -----------------//
 
     // Creating Tables
     @Override
@@ -86,7 +92,7 @@ public class StoreAndAnalyzeUserBehaviour extends SQLiteOpenHelper {
      */
 
     // Adding new action
-    void addAction(String description, String block_type, String block_orientation, String item_index, String modality, String current_level, String interaction_mode) {
+    public Action addAction(String description, String block_type, String block_orientation, String item_index, String modality, String current_level, String interaction_mode) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         Date date = new Date();
@@ -115,9 +121,13 @@ public class StoreAndAnalyzeUserBehaviour extends SQLiteOpenHelper {
         values.put(KEY_DATE, datetime);
         System.err.println("Storing action id: " + _id + " description:" + description + " using " + modality + " at " + datetime);
         System.err.println("Stored ui info - selected item: " + item_index +" from block with type:" + block_type + " orientation: " + block_orientation);
+
+
         // Inserting Row
         db.insert(TABLE_ACTIONS, null, values);
         db.close(); // Closing database connection
+
+        return new Action(_id, description, block_type, block_orientation, item_index, modality, current_level, interaction_mode, datetime);
     }
 
     /*// Getting single contact
@@ -274,7 +284,7 @@ public class StoreAndAnalyzeUserBehaviour extends SQLiteOpenHelper {
             actionsList = getAllActions();
             for (Action a : actionsList) {
                 //System.err.println( "id: " + a._id + " desc: " + a._description + " interaction mode: " + a._interaction_mode + " level: " + a._current_level + " modality: " + a._modality + " date: " + a._date);
-                writer.write(a._id + "," + a._description + "," + a._block_type + "," + a._block_orientation + "," + a._interaction_mode + "," + a._current_level + "," + a._modality + "," + a._date);
+                writer.write(a._id + "," + a._description + "," + a._block_type + "," + a._block_orientation + "," + a._item_index + "," + a._interaction_mode + "," + a._current_level + "," + a._modality + "," + a._date);
                 writer.newLine();
             }
             System.err.println( "Status: Successful");
@@ -287,6 +297,62 @@ public class StoreAndAnalyzeUserBehaviour extends SQLiteOpenHelper {
 
         System.err.println( "---------------------------------------------------------------------------");
 
+    }
+
+
+    //------------------------ Analyze User Interface Events -----------------//
+
+    public boolean hasUserDoneTutorial(){
+        return getActionCount("begin_tutorial") > 0;
+    }
+
+    public boolean isUserExperiencedWithVerbose() {
+        int nOfActionsInVerbose = getActionCountByLevel("1.");
+        return ( nOfActionsInVerbose > 0 && nOfActionsInVerbose > 150 && NumberOfErrors / nOfActionsInVerbose < 10);
+    }
+
+    public int getDirectionShiftPattern(){
+        return 0;
+    }
+
+    public int getActionCancelationPattern(){
+        return 0;
+    }
+
+    public int getIrrelevantActionsPattern(){
+        return 0;
+    }
+
+    public int getUpstairsPattern(){
+        return 0;
+    }
+
+    public int getFingersPattern(){
+        return 0;
+    }
+
+    public int getVerticalMovementsPattern(){
+        return 0;
+    }
+
+    public int getHorizontalScrollsPattern(){
+        return 0;
+    }
+
+    public int getPageHopingsPattern(){
+        return 0;
+    }
+
+    public int getHubAndSpokePattern(){
+        return 0;
+    }
+    
+    public int getLostAwarenessPattern(){
+        return 0;
+    }
+
+    public int getKeepItTraditionalPattern(){
+        return 0;
     }
 
 }
