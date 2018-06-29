@@ -15,11 +15,13 @@ public class TVApplicationState {
     private ArrayList<String> focusedDescriptions;
     private ArrayList<String> localizeOutput;
     private ArrayList<String> readScreenOutput;
+    private ArrayList<Action> actions;
 
     public TVApplicationState(){
         localizeOutput = new ArrayList<String>();
         readScreenOutput = new ArrayList<String>();
         focusedDescriptions = new ArrayList<String>();
+        actions = new ArrayList<Action>();
     }
 
     //getters
@@ -43,6 +45,10 @@ public class TVApplicationState {
         return focusedDescriptions;
     }
 
+    public ArrayList<Action> getActions(){
+        return actions;
+    }
+
     //setters
     public void setUIML(String newUIML)  {
         uiml = newUIML;
@@ -55,8 +61,6 @@ public class TVApplicationState {
             System.err.println("Error creating hash: " + e.fillInStackTrace());
             e.printStackTrace();
         }
-
-
 
     }
 
@@ -74,6 +78,10 @@ public class TVApplicationState {
     public void setFocusedDescriptions(ArrayList<String> newOutput){
         focusedDescriptions.clear();
         focusedDescriptions.addAll(newOutput);
+    }
+
+    public void addAction(Action a){
+        actions.add(a);
     }
 
 

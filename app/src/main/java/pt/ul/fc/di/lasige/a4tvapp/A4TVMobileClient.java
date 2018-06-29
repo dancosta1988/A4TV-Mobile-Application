@@ -81,7 +81,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
     private ArrayList<String> branchs;
     private boolean hasVideoPlayer = false;
     private MediaPlayer  mp;
-    private StoreAndAnalyzeUserBehaviour storing;
+    private A4TVUserInterfaceEventManager userInterfaceEventManager;
     private ArrayList<String> focusedDesc;
     private ArrayList<TVApplicationState> states;
     private int currentStateIndex = 0;
@@ -452,7 +452,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
         focusedDesc = new ArrayList<String>();
         lastSentence = new ArrayList<String>();
         mp = MediaPlayer.create(context, R.raw.error_earcon);
-        storing = new StoreAndAnalyzeUserBehaviour(context);
+        userInterfaceEventManager = new A4TVUserInterfaceEventManager(context);
         states = new ArrayList<TVApplicationState>();
     }
 
@@ -711,6 +711,11 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                 System.err.println("State has a localize already.");
                 ttsQueue.addAll(states.get(currentStateIndex).getLocalizeOutput());
                 focusedDesc.addAll(states.get(currentStateIndex).getFocusedDescriptions());
+                ArrayList<Action> actions = new ArrayList<Action>();
+                actions.addAll(states.get(currentStateIndex).getActions());
+                for (Action a: actions) {
+                    userInterfaceEventManager.addAction("current_block_info", a._block_type, a._block_orientation, a._item_index, "-", a._current_level, a._interaction_mode);
+                }
 
             } else {
                 System.err.println("State does not have localize output.");
@@ -830,8 +835,8 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                     */
 
 
-                        storing.addAction("current_block_info", block_type, orientation, index + "/" + count, "-", readingMode + "." + focusMode, interactionMode + "");
-
+                        Action action = userInterfaceEventManager.addAction("current_block_info", block_type, orientation, index + "/" + count, "-", readingMode + "." + focusMode, interactionMode + "");
+                        states.get(currentStateIndex).addAction(action);
 
                         if (readingMode == A4TVMobileClient.BASIC && focusMode == A4TVMobileClient.FOCUS_SIBLINGS) {
 
