@@ -42,7 +42,7 @@ public class A4TVGestureListener implements GestureDetector.OnGestureListener, G
 
     @Override
     public boolean onSingleTapConfirmed(MotionEvent motionEvent) {
-        onSingleTap();
+        //onSingleTap();
         return true;
     }
 
