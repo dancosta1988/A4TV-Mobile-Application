@@ -164,12 +164,12 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
                 case FINGERS_SPREAD:
                     if (gestureMode == 0) {
                         if (recognizerIntent != null) {
-                            userInterfaceEventManager.addAction("start speech", "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
+                            userInterfaceEventManager.addAction("start_speech", "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
                             sr.startListening(recognizerIntent);
                         }
                     } else if (gestureMode == 1) {
                         if (recognizerIntent != null) {
-                            userInterfaceEventManager.addAction("start speech", "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
+                            userInterfaceEventManager.addAction("start_speech", "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
                             sr.startListening(recognizerIntent);
                         }
 
@@ -442,6 +442,39 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
             userInterfaceEventManager.addAction("begin_tutorial", "-", "-" , "-" ,"none", readingMode + "." + focusMode, interactMode + "");
         }
 
+        int count = userInterfaceEventManager.getIrrelevantActionsPattern();
+        int count2 = userInterfaceEventManager.getLostAwarenessPattern();
+
+        int count3 = userInterfaceEventManager.getReOccurencePattern("localize");
+        int count4 = userInterfaceEventManager.getReOccurencePattern("read_screen");
+        int count5 = userInterfaceEventManager.getReOccurencePattern("up");
+        int count6 = userInterfaceEventManager.getReOccurencePattern("down");
+        int count7 = userInterfaceEventManager.getReOccurencePattern("left");
+        int count8 = userInterfaceEventManager.getReOccurencePattern("right");
+        int count9 = userInterfaceEventManager.getReOccurencePattern("ok");
+
+        int count10 = userInterfaceEventManager.getQuickVerticalnavigationPattern();
+        int count11 = userInterfaceEventManager.getQuickHorizontalNavigationPattern();
+
+        System.out.println("Irrelevant action patterns: " + count);
+        System.out.println("LostAwareness patterns: " + count2);
+        System.out.println("ReOccurence patterns " +
+                            " Localize: " + count3 +
+                            " Read Screen: " + count4 +
+                            " Up: " + count5 +
+                            " Down: " + count6 +
+                            " Left: " + count7 +
+                            " Right: " + count8 +
+                            " OK: " + count9);
+
+        System.out.println("VerticalMovements patterns: " + count10 + " HorizontalMovements patterns: " + count11 );
+
+        /*if(count > 0)
+            dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que já fez " + count + " acções irrelevantes. Deseja passar para o modo detalhado?", "reading_preference", "2").show();
+        if(count2 > 0)
+            dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que já se perdeu " + count2 + " vezes. Deseja passar para o modo detalhado?", "reading_preference", "2").show();
+        */
+
         //showAllActionsOnConsole();
 
         //save actions to file Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
@@ -591,7 +624,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
             case R.id.btnSpeech:
                 interrupt();
                 if(recognizerIntent != null) {
-                    userInterfaceEventManager.addAction("start speech", "-", "-" , "-" ,"button", readingMode+"."+focusMode, interactMode+"");
+                    userInterfaceEventManager.addAction("start_speech", "-", "-" , "-" ,"button", readingMode+"."+focusMode, interactMode+"");
                     sr.startListening(recognizerIntent);
                 }
                 break;
