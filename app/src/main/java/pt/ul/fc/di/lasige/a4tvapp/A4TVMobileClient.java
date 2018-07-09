@@ -554,7 +554,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
     }
 
     public void repeatLast(){
-        readFocusedElements(); //now repeat gives only the localization
+        readFocusedElements(true); //now repeat gives only the localization
         //sendToSpeaker();
     }
 
@@ -595,6 +595,13 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                         //lastMsg = fromServer;
                         stopSpeech();
                         System.err.println("Same msg!!!");
+                        ArrayList<Action> actions = new ArrayList<Action>();
+                        actions.addAll(states.get(currentStateIndex).getActions());
+                        for (Action a : actions) {
+                            userInterfaceEventManager.addAction("current_block_info", a._block_type, a._block_orientation, a._item_index, "-", a._current_level, a._interaction_mode);
+                        }
+
+
                         if(useTTS) {
                             mp.start();
                         }
@@ -627,7 +634,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                         }
 
                         uimlParser.setUIML(states.get(currentStateIndex).getUIML());
-                        readFocusedElements();
+                        readFocusedElements(false);
                         //sendToSpeaker();
                     }
 
@@ -700,7 +707,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
         return blockString;
     }
 
-    private void readFocusedElements(){
+    private void readFocusedElements(boolean userCommand){
 
         ttsQueue.clear();
         focusedDesc.clear();
@@ -711,10 +718,12 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                 System.err.println("State has a localize already.");
                 ttsQueue.addAll(states.get(currentStateIndex).getLocalizeOutput());
                 focusedDesc.addAll(states.get(currentStateIndex).getFocusedDescriptions());
-                ArrayList<Action> actions = new ArrayList<Action>();
-                actions.addAll(states.get(currentStateIndex).getActions());
-                for (Action a: actions) {
-                    userInterfaceEventManager.addAction("current_block_info", a._block_type, a._block_orientation, a._item_index, "-", a._current_level, a._interaction_mode);
+                if(!userCommand) {
+                    ArrayList<Action> actions = new ArrayList<Action>();
+                    actions.addAll(states.get(currentStateIndex).getActions());
+                    for (Action a : actions) {
+                        userInterfaceEventManager.addAction("current_block_info", a._block_type, a._block_orientation, a._item_index, "-", a._current_level, a._interaction_mode);
+                    }
                 }
 
             } else {
@@ -834,9 +843,10 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                     }
                     */
 
-
-                        Action action = userInterfaceEventManager.addAction("current_block_info", block_type, orientation, index + "/" + count, "-", readingMode + "." + focusMode, interactionMode + "");
-                        states.get(currentStateIndex).addAction(action);
+                        if(!userCommand) {
+                            Action action = userInterfaceEventManager.addAction("current_block_info", block_type, orientation, index + "/" + count, "-", readingMode + "." + focusMode, interactionMode + "");
+                            states.get(currentStateIndex).addAction(action);
+                        }
 
                         if (readingMode == A4TVMobileClient.BASIC && focusMode == A4TVMobileClient.FOCUS_SIBLINGS) {
 
