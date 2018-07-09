@@ -10,6 +10,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -204,6 +205,28 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         return actionList;
     }
 
+    // Getting all Actions except (description)
+    public List<Action> getActionsExcept(String desc) {
+        List<Action> actionList = new ArrayList<Action>();
+        // Select All Query
+        String selectQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + KEY_DESCRIPTION +" != '" + desc + "'";
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                Action action = new Action(cursor.getString(0), cursor.getString(1), cursor.getString(2),cursor.getString(3),cursor.getString(4), cursor.getString(5), cursor.getString(6),cursor.getString(7),cursor.getString(8));
+                // Adding contact to list
+                actionList.add(action);
+            } while (cursor.moveToNext());
+        }
+
+        // return contact list
+        return actionList;
+    }
+
     // Getting a specific action Count
     public int getActionCount(String desc) {
         String countQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + KEY_DESCRIPTION +" = '" + desc + "'";
@@ -311,46 +334,204 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         return ( nOfActionsInVerbose > 0 && nOfActionsInVerbose > 150 && NumberOfErrors / nOfActionsInVerbose < 10);
     }
 
+
+    //Direction Shift, usually happens when a user stops progressing along a branch of a task tree
     public int getDirectionShiftPattern(){
         return 0;
     }
 
+    //Action Cancellation, occurs when a user backtracks immediately after taking an action
     public int getActionCancelationPattern(){
         return 0;
     }
 
+    //Irrelevant Actions, when the user performs irrelevant actions during a task
+    //Actions that result in the same index will be considered irrelevant
     public int getIrrelevantActionsPattern(){
-        return 0;
+        int count = 0;
+
+        List<Action> actions = getSpecificActions("current_block_info");
+        for (int i = 0; i < actions.size()-4; i+=2) {
+
+            String index_1_1 = actions.get(i).getItemIndex();
+            String index_2_1 = actions.get(i+1).getItemIndex();
+            String index_1_2 = actions.get(i+2).getItemIndex();
+            String index_2_2 = actions.get(i+3).getItemIndex();
+            if(index_1_1.compareTo(index_1_2) == 0 && index_2_1.compareTo(index_2_2) == 0){
+                count++;
+            }
+        }
+
+
+        return count;
     }
 
+    //Action Re-occurrence, when the user performs an elementary action repeatedly
+    public int getReOccurencePattern(String elementaryAction){
+        int count = 0;
+        int countConsec = 0;
+
+        List<Action> actions = getActionsExcept("current_block_info");
+
+        for (int i = 0; i < actions.size() - 1; i++) {
+
+            if (actions.get(i).getDescription().compareTo(elementaryAction) == 0 &&
+                    (actions.get(i + 1).getDescription().compareTo(elementaryAction) == 0
+                            || (actions.get(i + 1).getDescription().compareTo("start_speech") == 0 && actions.get(i + 2).getDescription().compareTo(elementaryAction) == 0))) {
+
+                countConsec++;
+
+                if (countConsec == 3) // higher consec doesnt need to count
+                    count++;
+
+            } else {
+                countConsec = 0;
+            }
+
+        }
+
+
+        return count;
+    }
+
+    //Upstairs Pattern can indicate that the user is not following the route that the designer of the website intended
     public int getUpstairsPattern(){
         return 0;
     }
 
+    //Fingers pattern arises when the user navigates to other pages in a website but returns after short periods of time
     public int getFingersPattern(){
         return 0;
     }
 
-    public int getVerticalMovementsPattern(){
+    //Vertical/Horizontal Mouse Movement, this pattern happens when a user is unable to proceed with the execution of a
+    // task and starts to visually explore the interface for other options, usually this is reflected in the motion of the mouse pointer
+    public int getExplorePattern(){
         return 0;
     }
 
-    public int getHorizontalScrollsPattern(){
-        return 0;
+    //Quick Up/Down Scroll pattern means the user is searching and skimming for information
+    public int getQuickVerticalnavigationPattern(){
+        int count = 0;
+        int countConsec = 0;
+
+        List<Action> actions = getActionsExcept("current_block_info");
+
+        for (int i = 0; i < actions.size() - 1; i++) {
+
+            String time1 = actions.get(i).getDate();
+            SimpleDateFormat sdf1 = new java.text.SimpleDateFormat ("d-M-yyyy hh:mm:ss aa");
+            String time2 = actions.get(i+1).getDate();
+            SimpleDateFormat sdf2 = new java.text.SimpleDateFormat ("d-M-yyyy hh:mm:ss aa");
+            try {
+                sdf1.parse (time1);
+                sdf2.parse (time2);
+                long diff = sdf2.getCalendar().getTimeInMillis() - sdf1.getCalendar().getTimeInMillis();
+
+                if ((actions.get(i).getDescription().compareTo("up") == 0 || actions.get(i).getDescription().compareTo("down") == 0) &&
+                        ((actions.get(i + 1).getDescription().compareTo("up") == 0 || actions.get(i + 1).getDescription().compareTo("down") == 0)
+                                || (actions.get(i + 1).getDescription().compareTo("start_speech") == 0 && (actions.get(i + 2).getDescription().compareTo("up") == 0
+                                || actions.get(i + 2).getDescription().compareTo("down") == 0))) && diff <= 1000) {
+
+                    countConsec++;
+
+                    if (countConsec == 3) // higher consec doesnt need to count
+                        count++;
+
+                } else {
+                    countConsec = 0;
+                }
+
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        return count;
     }
 
+    //Quick Left/Right Scroll pattern means the user is searching and skimming for information
+    public int getQuickHorizontalNavigationPattern(){
+        int count = 0;
+        int countConsec = 0;
+
+        List<Action> actions = getActionsExcept("current_block_info");
+
+        for (int i = 0; i < actions.size() - 1; i++) {
+
+            String time1 = actions.get(i).getDate();
+            SimpleDateFormat sdf1 = new java.text.SimpleDateFormat ("d-M-yyyy hh:mm:ss aa");
+            String time2 = actions.get(i+1).getDate();
+            SimpleDateFormat sdf2 = new java.text.SimpleDateFormat ("d-M-yyyy hh:mm:ss aa");
+            try {
+                sdf1.parse (time1);
+                sdf2.parse (time2);
+                long diff = sdf2.getCalendar().getTimeInMillis() - sdf1.getCalendar().getTimeInMillis();
+
+
+                if ((actions.get(i).getDescription().compareTo("left") == 0 || actions.get(i).getDescription().compareTo("right") == 0) &&
+                        ((actions.get(i + 1).getDescription().compareTo("left") == 0 || actions.get(i + 1).getDescription().compareTo("right") == 0)
+                                || (actions.get(i + 1).getDescription().compareTo("start_speech") == 0 && (actions.get(i + 2).getDescription().compareTo("left") == 0
+                                || actions.get(i + 2).getDescription().compareTo("right") == 0))) && diff <= 1000) {
+
+                    countConsec++;
+
+                    if (countConsec == 3) // higher consec doesnt need to count
+                        count++;
+
+                } else {
+                    countConsec = 0;
+                }
+
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        return count;
+    }
+
+    //Page Hoping happens when a user spends short periods of time in a page as he/she is backtracking for a familiar page
     public int getPageHopingsPattern(){
         return 0;
     }
 
+    //Hub and Spoke navigation pattern occurs when the user keeps returning to a familiar page after accessing an unfamiliar one,
+    // not accessing more than two pages away.
     public int getHubAndSpokePattern(){
         return 0;
     }
-    
+
+    //User is always using the localize feature after each action
     public int getLostAwarenessPattern(){
-        return 0;
+        int count = 0;
+        int countConsec = 0;
+
+        List<Action> actions = getAllActions();
+        for (int i = 0; i < actions.size()-2; i++) {
+
+            if(actions.get(i).getDescription().compareTo("current_block_info") == 0 && actions.get(i+1).getDescription().compareTo("current_block_info") != 0){
+
+                if(actions.get(i+1).getDescription().compareTo("localize") == 0 || actions.get(i+2).getDescription().compareTo("localize") == 0){
+
+                    countConsec++;
+
+                    if(countConsec == 3) // higher consec doesnt need to count
+                        count++;
+
+                }else{
+                    countConsec = 0;
+                }
+            }
+        }
+
+
+        return count;
     }
 
+    //User is always using the talkback modality
     public int getKeepItTraditionalPattern(){
         return 0;
     }
