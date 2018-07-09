@@ -32,7 +32,12 @@ public class A4TVAdaptationAndTutorialDialogs {
         AlertDialog.Builder builder = bld.createDialog(context, title, message);
 
 
-        builder.setPositiveButton("Seguinte", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton("Não", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 // accepted
                 //editor.putString("reading_preference", "1");
