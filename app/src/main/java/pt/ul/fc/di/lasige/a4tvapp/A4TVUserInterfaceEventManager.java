@@ -334,6 +334,21 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         return ( nOfActionsInVerbose > 0 && nOfActionsInVerbose > 150 && NumberOfErrors / nOfActionsInVerbose < 10);
     }
 
+    //User is always using the talkback modality
+    public boolean isUserAlwaysUsingTalkBAck(){
+        float count = 0;
+
+
+        List<Action> actions = getActionsExcept("current_block_info");
+        for (int i = 0; i < actions.size(); i++) {
+
+            if(actions.get(i).getModality().compareTo("button") == 0 )
+                count++;
+
+        }
+
+        return (count/actions.size() >= 0.8);
+    }
 
     //Direction Shift, usually happens when a user stops progressing along a branch of a task tree
     public int getDirectionShiftPattern(){
@@ -372,17 +387,20 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         int countConsec = 0;
 
         List<Action> actions = getActionsExcept("current_block_info");
-
+        //System.out.println(actions.size());
         for (int i = 0; i < actions.size() - 1; i++) {
 
+            //System.out.println(actions.get(i).getDescription());
             if (actions.get(i).getDescription().compareTo(elementaryAction) == 0 &&
                     (actions.get(i + 1).getDescription().compareTo(elementaryAction) == 0
-                            || (actions.get(i + 1).getDescription().compareTo("start_speech") == 0 && actions.get(i + 2).getDescription().compareTo(elementaryAction) == 0))) {
+                            || actions.get(i + 1).getDescription().compareTo(elementaryAction) == 0)) {
 
                 countConsec++;
 
+
                 if (countConsec == 3) // higher consec doesnt need to count
                     count++;
+
 
             } else {
                 countConsec = 0;
@@ -431,7 +449,11 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
                 if ((actions.get(i).getDescription().compareTo("up") == 0 || actions.get(i).getDescription().compareTo("down") == 0) &&
                         ((actions.get(i + 1).getDescription().compareTo("up") == 0 || actions.get(i + 1).getDescription().compareTo("down") == 0)
                                 || (actions.get(i + 1).getDescription().compareTo("start_speech") == 0 && (actions.get(i + 2).getDescription().compareTo("up") == 0
-                                || actions.get(i + 2).getDescription().compareTo("down") == 0))) && diff <= 1000) {
+                                || actions.get(i + 2).getDescription().compareTo("down") == 0))) &&
+                        ((actions.get(i).getModality().compareTo("button") == 0 && diff <= 4000) ||
+                                (actions.get(i).getModality().compareTo("speech") == 0 && diff <= 6000) ||
+                                (actions.get(i).getModality().compareTo("screen_gesture") == 0 && diff <= 2000) ||
+                                (actions.get(i).getModality().compareTo("mid_air_gesture") == 0 && diff <= 2000))) {
 
                     countConsec++;
 
@@ -464,16 +486,22 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
             SimpleDateFormat sdf1 = new java.text.SimpleDateFormat ("d-M-yyyy hh:mm:ss aa");
             String time2 = actions.get(i+1).getDate();
             SimpleDateFormat sdf2 = new java.text.SimpleDateFormat ("d-M-yyyy hh:mm:ss aa");
+
             try {
                 sdf1.parse (time1);
                 sdf2.parse (time2);
                 long diff = sdf2.getCalendar().getTimeInMillis() - sdf1.getCalendar().getTimeInMillis();
-
-
+                /*System.out.println("Date1 =" + sdf1.getCalendar().getTime());
+                System.out.println("Date2 =" + sdf2.getCalendar().getTime());
+                System.out.println("Modality: "+ actions.get(i).getModality() + " Diff =" + diff);*/
                 if ((actions.get(i).getDescription().compareTo("left") == 0 || actions.get(i).getDescription().compareTo("right") == 0) &&
                         ((actions.get(i + 1).getDescription().compareTo("left") == 0 || actions.get(i + 1).getDescription().compareTo("right") == 0)
                                 || (actions.get(i + 1).getDescription().compareTo("start_speech") == 0 && (actions.get(i + 2).getDescription().compareTo("left") == 0
-                                || actions.get(i + 2).getDescription().compareTo("right") == 0))) && diff <= 1000) {
+                                || actions.get(i + 2).getDescription().compareTo("right") == 0))) &&
+                        ((actions.get(i).getModality().compareTo("button") == 0 && diff <= 4000) ||
+                                (actions.get(i).getModality().compareTo("speech") == 0 && diff <= 6000) ||
+                                (actions.get(i).getModality().compareTo("screen_gesture") == 0 && diff <= 2000) ||
+                                (actions.get(i).getModality().compareTo("mid_air_gesture") == 0 && diff <= 2000))) {
 
                     countConsec++;
 
@@ -529,11 +557,6 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
 
         return count;
-    }
-
-    //User is always using the talkback modality
-    public int getKeepItTraditionalPattern(){
-        return 0;
     }
 
 }
