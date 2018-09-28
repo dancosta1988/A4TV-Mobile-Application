@@ -112,7 +112,6 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
                 else if(pose == Pose.WAVE_OUT)
                     pose = Pose.WAVE_IN;
             }
-            System.err.println(" Gesture mode " + gestureMode);
             switch (pose) {
                 case WAVE_IN:
                     if (gestureMode == 0) {
@@ -216,7 +215,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
                 counter++;
                 int diffPitch = (pitch - normalizationPitch);
                 int diffYaw = (yaw - normalizationYaw);
-                if (_pose == Pose.FIST && counter >= 50) {
+                if (_pose == Pose.FIST && counter >= 60) {
 
                     if (diffPitch > 0) {
                         System.err.println("Swipe Up");
@@ -506,11 +505,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
         System.err.println( "Getting action count from a specific level (e.g. 1.*): " + userInterfaceEventManager.getActionCountByLevel("1."));
 
         if(userInterfaceEventManager.isUserExperiencedWithVerbose() && readingMode == 1) {
-            dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que o utilizador já tem alguma experiência, deseja passar para o modo conciso?", "reading_preference", "2").show();
-        }
-
-        if(userInterfaceEventManager.getIrrelevantActionsPattern() > 6 && readingMode == 2) {
-            dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que está enviar comandos que não produzem efeito, deseja passar para o modo detalhado?", "reading_preference", "1").show();
+            dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que o utilizador já tem alguma experiência, deseja passar para o modo avançado?", "reading_preference", "2").show();
         }
 
         System.err.println( "Fetching all actions' information");
