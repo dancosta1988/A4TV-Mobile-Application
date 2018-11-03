@@ -13,6 +13,7 @@ public class Action {
 
     //private variables
     String _id;
+    String _user_id;
     String _description;
     String _block_type;
     String _block_orientation;
@@ -23,9 +24,10 @@ public class Action {
     String _date;
 
     // constructor
-    public Action(String _id, String _description, String _block_type, String _block_orientation, String _item_index, String _modality, String _current_level, String _interaction_mode, String _date){
+    public Action(String _id, String _user_id, String _description, String _block_type, String _block_orientation, String _item_index, String _modality, String _current_level, String _interaction_mode, String _date){
 
             this._id = _id;
+            this._user_id = _user_id;
             this._description = _description;
             this._block_orientation = _block_orientation;
             this._block_type = _block_type;
@@ -38,13 +40,14 @@ public class Action {
     }
 
     // constructor
-    public Action(String _description, String _block_type, String _block_orientation, String _item_index, String _modality, String _current_level, String _interaction_mode){
+    public Action(String _description, String _user_id, String _block_type, String _block_orientation, String _item_index, String _modality, String _current_level, String _interaction_mode){
 
         Calendar c = Calendar.getInstance();
         SimpleDateFormat dateformat = new SimpleDateFormat("dMyyyyhhmmss");
         String datetime = dateformat.format(c.getTime());
 
-        this._id =  UUID.randomUUID().toString();;
+        this._id =  UUID.randomUUID().toString();
+        this._user_id = _user_id;
         this._description = _description;
         this._block_orientation = _block_orientation;
         this._block_type = _block_type;
@@ -62,6 +65,11 @@ public class Action {
     // getting ID
     public String getID(){
         return this._id;
+    }
+
+    // getting user ID
+    public String getUserID(){
+        return this._user_id;
     }
 
     // getting description

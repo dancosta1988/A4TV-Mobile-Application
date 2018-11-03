@@ -46,11 +46,7 @@
             android:entries="@array/pref_focus_mode_entries"
             android:entryValues="@array/pref_focus_mode_values"/>
 
-        <ListPreference
-            android:key="user_type"
-            android:title="Caracteristicas do Utilizador"
-            android:entries="@array/pref_user_type_entries"
-            android:entryValues="@array/pref_user_type_values"/>
+
     </PreferenceCategory>
 
 </PreferenceScreen>

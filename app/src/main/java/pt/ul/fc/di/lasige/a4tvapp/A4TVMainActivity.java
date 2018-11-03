@@ -443,48 +443,12 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
             userInterfaceEventManager.addAction("begin_tutorial", "-", "-" , "-" ,"none", readingMode + "." + focusMode, interactMode + "");
         }
 
-        int count = userInterfaceEventManager.getIrrelevantActionsPattern();
-        int count2 = userInterfaceEventManager.getLostAwarenessPattern();
+        if(userInterfaceEventManager.isTimeToCheckEvents())
+            checkForAccessibilityIssues();
 
-        int count3 = userInterfaceEventManager.getReOccurencePattern("localize");
-        int count4 = userInterfaceEventManager.getReOccurencePattern("read_screen");
-        int count5 = userInterfaceEventManager.getReOccurencePattern("up");
-        int count6 = userInterfaceEventManager.getReOccurencePattern("down");
-        int count7 = userInterfaceEventManager.getReOccurencePattern("left");
-        int count8 = userInterfaceEventManager.getReOccurencePattern("right");
-        int count9 = userInterfaceEventManager.getReOccurencePattern("ok");
-
-        int count10 = userInterfaceEventManager.getQuickVerticalnavigationPattern();
-        int count11 = userInterfaceEventManager.getQuickHorizontalNavigationPattern();
-
-        System.out.println("Irrelevant action patterns: " + count);
-        System.out.println("LostAwareness patterns: " + count2);
-        System.out.println("ReOccurence patterns " +
-                            " Localize: " + count3 +
-                            " Read Screen: " + count4 +
-                            " Up: " + count5 +
-                            " Down: " + count6 +
-                            " Left: " + count7 +
-                            " Right: " + count8 +
-                            " OK: " + count9);
-
-        System.out.println("VerticalMovements patterns: " + count10 + " HorizontalMovements patterns: " + count11 );
-
-        /*if(count > 0)
-            dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que já fez " + count + " acções irrelevantes. Deseja passar para o modo detalhado?", "reading_preference", "2").show();
-        if(count2 > 0)
-            dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que já se perdeu " + count2 + " vezes. Deseja passar para o modo detalhado?", "reading_preference", "2").show();
-        */
-
-        //showAllActionsOnConsole();
 
         //save actions to file Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
-
-        /*if(permissionWriteCheck == PackageManager.PERMISSION_GRANTED) {
-
-            userInterfaceEventManager.storeAllActionsOnCSV(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + "/A4TV");
-        }*/
 
         Thread probe = new Thread(new DiscoverSTBAddress(this));
         probe.start();
@@ -498,44 +462,90 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
 
     }
 
+    private void checkForAccessibilityIssues(){
+        userInterfaceEventManager.addAction("check_user_events", "-", "-", "-", "-", readingMode + "." + focusMode, interactMode + "");
 
-    private void testStorage(){
-        System.err.println( "Testing storage module... ");
-        System.err.println( "Getting all stored actions count: " + userInterfaceEventManager.getAllActionsCount());
-        System.err.println( "Getting specific action (e.g. right) count: " + userInterfaceEventManager.getActionCount("right"));
-        System.err.println( "Getting action count from a specific level (e.g. 1.*): " + userInterfaceEventManager.getActionCountByLevel("1."));
-
-        if(userInterfaceEventManager.isUserExperiencedWithVerbose() && readingMode == 1) {
-            dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que o utilizador já tem alguma experiência, deseja passar para o modo conciso?", "reading_preference", "2").show();
+        if(userInterfaceEventManager.isUserExperiencedWithVerbose() && readingMode == A4TVMobileClient.VERBOSE) {
+            dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que o utilizador já tem alguma experiência," +
+                    " deseja passar para o modo conciso?", "reading_preference", "2").show();
+            getUserPreferences();
         }
 
-        if(userInterfaceEventManager.getIrrelevantActionsPattern() > 6 && readingMode == 2) {
-            dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que está enviar comandos que não produzem efeito, deseja passar para o modo detalhado?", "reading_preference", "1").show();
+        if(userInterfaceEventManager.findIrrelevantActionsPattern()) {
+            if(readingMode == A4TVMobileClient.CONCISE)
+                dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que está enviar comandos que não produzem efeito," +
+                        " deseja passar para o modo detalhado?", "reading_preference", A4TVMobileClient.VERBOSE+"").show();
+            else if(readingMode == A4TVMobileClient.VERBOSE) {
+                if(focusMode == A4TVMobileClient.FOCUS_SIBLINGS)
+                    dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que está enviar comandos que não produzem efeito," +
+                            " deseja experimentar outra versão do modo detalhado?", "focus_preference", A4TVMobileClient.FOCUS_MAP+"").show();
+                else
+                    dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que está enviar comandos que não produzem efeito," +
+                            " deseja experimentar outra versão do modo detalhado?", "focus_preference", A4TVMobileClient.FOCUS_SIBLINGS+"").show();
+            }
+
+            if(userType == A4TVMobileClient.PARTIAL)
+                // Change contrast and font-size values
+
+            getUserPreferences();
         }
 
-        System.err.println( "Fetching all actions' information");
-        List<Action> actionsList = new ArrayList<Action>();
-        actionsList = userInterfaceEventManager.getAllActions();
-        for (Action a: actionsList) {
-            System.err.println( "id: " + a._id + " desc: " + a._description + " interaction mode: " + a._interaction_mode + " level: " + a._current_level + " modality: " + a._modality + " date: " + a._date);
-        }
-        System.err.println( "---------------------------------------------------------------------------");
-        System.err.println( "Fetching specific actions (e.g. ok)");
-        actionsList = new ArrayList<Action>();
-        actionsList = userInterfaceEventManager.getSpecificActions("ok");
-        for (Action a: actionsList) {
-            System.err.println( "id: " + a._id + " desc: " + a._description + " interaction mode: " + a._interaction_mode + " level: " + a._current_level + " modality: " + a._modality + " date: " + a._date);
-        }
-        System.err.println( "---------------------------------------------------------------------------");
-        System.err.println( "Fetching actions by level (e.g. 2.2)");
-        actionsList = new ArrayList<Action>();
-        actionsList = userInterfaceEventManager.getActionsByLevel("2.2");
-        for (Action a: actionsList) {
-            System.err.println( "id: " + a._id + " desc: " + a._description + " interaction mode: " + a._interaction_mode + " level: " + a._current_level + " modality: " + a._modality + " date: " + a._date);
+        if(userInterfaceEventManager.findReOccurencePattern("localize")) {
+            if(readingMode == A4TVMobileClient.CONCISE)
+                dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que usa muitas vezes o localizar," +
+                        " deseja passar para o modo detalhado?", "reading_preference", A4TVMobileClient.VERBOSE + "").show();
+             else if(readingMode == A4TVMobileClient.VERBOSE) {
+                if (focusMode == A4TVMobileClient.FOCUS_SIBLINGS)
+                    dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que usa muitas vezes o localizar, " +
+                            "deseja experimentar outra versão do modo detalhado?", "focus_preference", A4TVMobileClient.FOCUS_MAP + "").show();
+                else
+                    dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que usa muitas vezes o localizar," +
+                            " deseja experimentar outra versão do modo detalhado?", "focus_preference", A4TVMobileClient.FOCUS_SIBLINGS + "").show();
+            }
+            getUserPreferences();
         }
 
+        if(userInterfaceEventManager.findReOccurencePattern("read_screen")) {
+            if(readingMode == A4TVMobileClient.CONCISE)
+                dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que usa muitas vezes o ler ecrã," +
+                        " deseja passar para o modo detalhado?", "reading_preference", A4TVMobileClient.VERBOSE + "").show();
+            else if(readingMode == A4TVMobileClient.VERBOSE) {
+                double newSpeed = (speechSpeed - 0.2);
+                if(newSpeed < 0)
+                    newSpeed = 0;
+                dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que usa muitas vezes o ler ecrã," +
+                        " deseja diminuir a velocidade de leitura?", "configure_speed", newSpeed + "").show();
+
+            }
+            getUserPreferences();
+        }
+
+        if(userInterfaceEventManager.findQuickVerticalnavigationPattern()) {
+            if(readingMode == A4TVMobileClient.CONCISE) {
+                double newSpeed = (speechSpeed + 0.2);
+                if(newSpeed < 0)
+                    newSpeed = 0;
+                dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que navega rapidamente nas aplicações de TV, " +
+                        "deseja aumentar a velocidade de leitura?", "configure_speed", newSpeed + "").show();
+            }else if(readingMode == A4TVMobileClient.VERBOSE) {
+                dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que navega rapidamente nas aplicações de TV," +
+                        " deseja passar para o modo conciso?", "reading_preference", A4TVMobileClient.CONCISE + "").show();
+            }
+            getUserPreferences();
+        }
 
     }
+
+    private boolean checkForSpeechProblems(){
+        boolean result = false;
+        if(userInterfaceEventManager.findReOccurencePattern("start_speech")) {
+            //dialogs.createSuggestionDialog("Sugestão", "A aplicação detectou que está a ter problemas com os comandos de voz. " +
+            //        "Lembre-se de falar o comando claramente e apenas após o sinal. Os comandos disponíveis são localizar, ler, cima, baixo, esquerda, direita, ok, ligar e desligar.");
+            result = true;
+        }
+        return result;
+    }
+
 
 
 
@@ -630,6 +640,10 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
                 interrupt();
                 if(recognizerIntent != null) {
                     userInterfaceEventManager.addAction("start_speech", "-", "-" , "-" ,"button", readingMode+"."+focusMode, interactMode+"");
+                    if(checkForSpeechProblems()){
+                        mobileClient.setVideoVolume(0.2);
+                        sendKeyboardInstruction(-1);
+                    }
                     sr.startListening(recognizerIntent);
                 }
                 break;
@@ -663,6 +677,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
 
     private void getUserPreferences(){
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
         useTTS = sharedPrefs.getBoolean("TTS Preference Source", false);
         readingMode = Integer.parseInt(sharedPrefs.getString("reading_preference", "1"));
         interactMode = Integer.parseInt(sharedPrefs.getString("interact_preference", "1"));
@@ -672,6 +687,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
         speechSpeed = Float.parseFloat(sharedPrefs.getString("configure_speed", "1.0"));
         gestureMode = Integer.parseInt(sharedPrefs.getString("gesture_preference", "0"));
         ipAdd = sharedPrefs.getString("Set-Top Box IP address", ipAdd);
+        userInterfaceEventManager.setCurrentUserID(sharedPrefs.getString("user_id", "root"));
     }
 
     public static void showButtons(){
@@ -918,6 +934,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
                     break;
                 case SpeechRecognizer.ERROR_NO_MATCH:
                     System.err.println("No match");
+                    //userInterfaceEventManager.addAction("speech_error", "-", "-", "-", "-", readingMode + "." + focusMode, interactMode + "");
                     if(mobileClient != null)
                         mobileClient.speakThis("Comando inexistente.");
                     break;
@@ -1027,6 +1044,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
 
                 if (!shouldBreak && mobileClient != null)
                     mobileClient.speakThis("Comando inexistente.");
+
             }
             //mText.setText("results: "+String.valueOf(data.size()));
         }

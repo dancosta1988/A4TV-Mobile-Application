@@ -2,8 +2,8 @@
     <string name="app_name">Controlo Remoto Acessível</string>
     <string name="action_settings">Definições</string>
     <string name="title_activity_settings">Definições</string>
-
-
+    <string name="pref_user_profile">Prefile de Utilizador</string>
+    <string name="user_id">Nome de Utilizador</string>
 
     <!-- Example settings for Data & Sync -->
     <string name="pref_header_data_sync">Data &amp; sync</string>

@@ -36,7 +36,8 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     private static final String TABLE_ACTIONS = "actions";
 
     // Actions Table Columns names
-    private static final String KEY_ID = "id";
+    private static final String KEY_ID = "action_id";
+    private static final String USER_ID = "user_id";
     private static final String KEY_DESCRIPTION = "description";
     private static final String KEY_MODALITY = "modality";
     private static final String KEY_CURRENT_LEVEL = "current_level";
@@ -46,7 +47,20 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     private static final String KEY_ITEM_INDEX = "item_index";
     private static final String KEY_DATE = "DATE";
 
+    //Thresholds
+    static final int IRRELEVANT_ACTIONS_THRESHOLD = 6;
+    static final int REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD = 6;
+    static final int REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD = 6;
+    static final int REOCCURENCE_SPEECH_ACTIONS_THRESHOLD = 3;
+    static final int QUICK_SCROLL_ACTIONS_THRESHOLD = 6;
+    static final int LOST_AWARENESS_ACTIONS_THRESHOLD = 6;
+    static final int LONG_CHECK_ACTIONS_THRESHOLD = 6685; //Average 191 actions per hour (7 days x 5 hours = 6685)
+    static final int SHORT_CHECK_ACTIONS_THRESHOLD = 120;
+
+
     private int NumberOfErrors = 0;
+
+    private String currentUserID;
 
 
     public A4TVUserInterfaceEventManager(Context context) {
@@ -61,13 +75,16 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
     }
 
+    public void setCurrentUserID(String user_id){
+        currentUserID = user_id;
+    }
     //------------------------ Storing User Interface Events -----------------//
 
     // Creating Tables
     @Override
     public void onCreate(SQLiteDatabase db) {
         String CREATE_ACTIONS_TABLE = "CREATE TABLE " + TABLE_ACTIONS + "("
-                + KEY_ID + " TEXT PRIMARY KEY," + KEY_DESCRIPTION + " TEXT," + KEY_BLOCK_TYPE + " TEXT," + KEY_BLOCK_ORIENTATION + " TEXT," + KEY_ITEM_INDEX + " TEXT,"
+                + KEY_ID + " TEXT PRIMARY KEY," + USER_ID + " TEXT,"+ KEY_DESCRIPTION + " TEXT," + KEY_BLOCK_TYPE + " TEXT," + KEY_BLOCK_ORIENTATION + " TEXT," + KEY_ITEM_INDEX + " TEXT,"
                 + KEY_MODALITY + " TEXT, " + KEY_CURRENT_LEVEL + " TEXT," + KEY_INTERACTION_MODE + " TEXT," + KEY_DATE + " DATE )";
         db.execSQL(CREATE_ACTIONS_TABLE);
     }
@@ -108,6 +125,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(KEY_ID, _id);
+        values.put(USER_ID, currentUserID);
         values.put(KEY_DESCRIPTION, description);
         values.put(KEY_BLOCK_TYPE, block_type);
         values.put(KEY_BLOCK_ORIENTATION, block_orientation);
@@ -128,7 +146,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         db.insert(TABLE_ACTIONS, null, values);
         db.close(); // Closing database connection
 
-        return new Action(_id, description, block_type, block_orientation, item_index, modality, current_level, interaction_mode, datetime);
+        return new Action(_id, currentUserID, description, block_type, block_orientation, item_index, modality, current_level, interaction_mode, datetime);
     }
 
     /*// Getting single contact
@@ -151,7 +169,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     public List<Action> getAllActions() {
         List<Action> actionList = new ArrayList<Action>();
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_ACTIONS;
+        String selectQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + USER_ID + " = '" + currentUserID + "'";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -159,7 +177,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
-                Action action = new Action(cursor.getString(0), cursor.getString(1), cursor.getString(2),cursor.getString(3),cursor.getString(4), cursor.getString(5), cursor.getString(6),cursor.getString(7),cursor.getString(8));
+                Action action = new Action(cursor.getString(0), cursor.getString(1), cursor.getString(2),cursor.getString(3),cursor.getString(4), cursor.getString(5), cursor.getString(6),cursor.getString(7),cursor.getString(8),cursor.getString(9));
                 // Adding contact to list
                 actionList.add(action);
             } while (cursor.moveToNext());
@@ -172,7 +190,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
     // Getting actions Count
     public int getAllActionsCount() {
-        String countQuery = "SELECT  * FROM " + TABLE_ACTIONS;
+        String countQuery = "SELECT  * FROM " + TABLE_ACTIONS  + " WHERE " + USER_ID + " = '" + currentUserID + "'";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
 
@@ -187,7 +205,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     public List<Action> getSpecificActions(String desc) {
         List<Action> actionList = new ArrayList<Action>();
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + KEY_DESCRIPTION +" = '" + desc + "'";
+        String selectQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + KEY_DESCRIPTION +" = '" + desc + "'" + " AND " + USER_ID + " = '" + currentUserID + "'";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -195,7 +213,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
-                Action action = new Action(cursor.getString(0), cursor.getString(1), cursor.getString(2),cursor.getString(3),cursor.getString(4), cursor.getString(5), cursor.getString(6),cursor.getString(7),cursor.getString(8));
+                Action action = new Action(cursor.getString(0), cursor.getString(1), cursor.getString(2),cursor.getString(3),cursor.getString(4), cursor.getString(5), cursor.getString(6),cursor.getString(7),cursor.getString(8),cursor.getString(9));
                 // Adding contact to list
                 actionList.add(action);
             } while (cursor.moveToNext());
@@ -209,7 +227,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     public List<Action> getActionsExcept(String desc) {
         List<Action> actionList = new ArrayList<Action>();
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + KEY_DESCRIPTION +" != '" + desc + "'";
+        String selectQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + KEY_DESCRIPTION +" != '" + desc + "' AND " + USER_ID + " = '" + currentUserID + "'";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -217,7 +235,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
-                Action action = new Action(cursor.getString(0), cursor.getString(1), cursor.getString(2),cursor.getString(3),cursor.getString(4), cursor.getString(5), cursor.getString(6),cursor.getString(7),cursor.getString(8));
+                Action action = new Action(cursor.getString(0), cursor.getString(1), cursor.getString(2),cursor.getString(3),cursor.getString(4), cursor.getString(5), cursor.getString(6),cursor.getString(7),cursor.getString(8),cursor.getString(9));
                 // Adding contact to list
                 actionList.add(action);
             } while (cursor.moveToNext());
@@ -229,7 +247,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
     // Getting a specific action Count
     public int getActionCount(String desc) {
-        String countQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + KEY_DESCRIPTION +" = '" + desc + "'";
+        String countQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + KEY_DESCRIPTION +" = '" + desc + "'" + " AND " + USER_ID + " = '" + currentUserID + "'";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
         int count =cursor.getCount();
@@ -241,7 +259,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
     // Getting a specific level action Count
     public int getActionCountByLevel(String level) {
-        String countQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + KEY_CURRENT_LEVEL +" LIKE '" + level + "%'";
+        String countQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + KEY_CURRENT_LEVEL +" LIKE '" + level + "%'" + " AND " + USER_ID + " = '" + currentUserID + "'";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
         int count =cursor.getCount();
@@ -255,7 +273,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     public List<Action> getActionsByLevel(String level) {
         List<Action> actionList = new ArrayList<Action>();
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + KEY_CURRENT_LEVEL +" LIKE '" + level + "%'";
+        String selectQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + KEY_CURRENT_LEVEL +" LIKE '" + level + "%'" + " AND " + USER_ID + " = '" + currentUserID + "'";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -263,7 +281,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
-                Action action = new Action(cursor.getString(0), cursor.getString(1), cursor.getString(2),cursor.getString(3),cursor.getString(4), cursor.getString(5), cursor.getString(6),cursor.getString(7),cursor.getString(8));
+                Action action = new Action(cursor.getString(0), cursor.getString(1), cursor.getString(2),cursor.getString(3),cursor.getString(4), cursor.getString(5), cursor.getString(6),cursor.getString(7),cursor.getString(8),cursor.getString(9));
                 // Adding contact to list
                 actionList.add(action);
             } while (cursor.moveToNext());
@@ -279,7 +297,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         List<Action> actionsList = new ArrayList<Action>();
         actionsList = getAllActions();
         for (Action a: actionsList) {
-            System.err.println( "id: " + a._id + " desc: " + a._description + " interaction mode: " + a._interaction_mode + " level: " + a._current_level + " modality: " + a._modality + " date: " + a._date);
+            System.err.println( "id: " + a._id + " user id: " + a._user_id +" desc: " + a._description + " interaction mode: " + a._interaction_mode + " level: " + a._current_level + " modality: " + a._modality + " date: " + a._date);
         }
         System.err.println( "---------------------------------------------------------------------------");
     }
@@ -296,7 +314,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
                 if (root.mkdir()) ; //directory is created;
             }
 
-            File outputFile = new File(root, "user_actions.csv");
+            File outputFile = new File(root, currentUserID+"_user_actions.csv");
            /* if (!outputFile.exists()) {
                 if (outputFile.mkdir()) ; //directory is created;
             }*/
@@ -334,6 +352,24 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         return ( nOfActionsInVerbose > 0 && nOfActionsInVerbose > 150 && NumberOfErrors / nOfActionsInVerbose < 10);
     }
 
+    public boolean isTimeToCheckEvents(){
+
+        Long currentMili = new Date().getTime();
+
+        List<Action> actions = getAllActions();
+        boolean needCheck = false;
+        int i = actions.size()-1;
+        if(actions.size() > 0) {
+            while ( i >= 0 && actions.get(i).getDescription().compareTo("check_user_events") != 0)
+            {
+                i--;
+            }
+            if(i >= LONG_CHECK_ACTIONS_THRESHOLD)
+                needCheck = true;
+        }
+        return needCheck;
+    }
+
     //User is always using the talkback modality
     public boolean isUserAlwaysUsingTalkBAck(){
         float count = 0;
@@ -362,53 +398,87 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
     //Irrelevant Actions, when the user performs irrelevant actions during a task
     //Actions that result in the same index will be considered irrelevant
-    public int getIrrelevantActionsPattern(){
+    public boolean findIrrelevantActionsPattern(){
         int count = 0;
+        Long currentMili = new Date().getTime();
+
 
         List<Action> actions = getSpecificActions("current_block_info");
         for (int i = 0; i < actions.size()-4; i+=2) {
+            try {
 
-            String index_1_1 = actions.get(i).getItemIndex();
-            String index_2_1 = actions.get(i+1).getItemIndex();
-            String index_1_2 = actions.get(i+2).getItemIndex();
-            String index_2_2 = actions.get(i+3).getItemIndex();
-            if(index_1_1.compareTo(index_1_2) == 0 && index_2_1.compareTo(index_2_2) == 0){
-                count++;
+
+                String time1 = actions.get(i).getDate();
+                SimpleDateFormat sdf1 = new java.text.SimpleDateFormat("d-M-yyyy hh:mm:ss aa");
+                sdf1.parse(time1);
+                long diff = currentMili - sdf1.getCalendar().getTimeInMillis();
+                if (diff <= 604800000) {
+                    String index_1_1 = actions.get(i).getItemIndex();
+                    String index_2_1 = actions.get(i + 1).getItemIndex();
+                    String index_1_2 = actions.get(i + 2).getItemIndex();
+                    String index_2_2 = actions.get(i + 3).getItemIndex();
+                    if (index_1_1.compareTo(index_1_2) == 0 && index_2_1.compareTo(index_2_2) == 0) {
+                        count++;
+                    }
+                }
+
+            }catch(Exception e){
+
             }
         }
 
 
-        return count;
+        return count >= IRRELEVANT_ACTIONS_THRESHOLD;
+    }
+
+    public boolean findReOccurencePattern(String elementaryAction) {
+        boolean found = false;
+        switch (elementaryAction){
+            case "localize": found = getReOccurencePattern(elementaryAction, LONG_CHECK_ACTIONS_THRESHOLD) >= REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD; break;
+            case "read_screen": found = getReOccurencePattern(elementaryAction, LONG_CHECK_ACTIONS_THRESHOLD) >= REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD; break;
+            case "start_speech": found = getReOccurencePattern(elementaryAction, SHORT_CHECK_ACTIONS_THRESHOLD) >= REOCCURENCE_SPEECH_ACTIONS_THRESHOLD; break;
+        }
+        return found;
     }
 
     //Action Re-occurrence, when the user performs an elementary action repeatedly
-    public int getReOccurencePattern(String elementaryAction){
+    private int getReOccurencePattern(String elementaryAction, int lastNumberofActions){
         int count = 0;
         int countConsec = 0;
-
+        //Long currentMili = new Date().getTime();
         List<Action> actions = getActionsExcept("current_block_info");
-        //System.out.println(actions.size());
+        if(actions.size() > lastNumberofActions)
+            actions = actions.subList(actions.size()-lastNumberofActions-1,actions.size()-1);
+        System.out.println(actions.size());
         for (int i = 0; i < actions.size() - 1; i++) {
+            try {
+                /*String time1 = actions.get(i).getDate();
+                SimpleDateFormat sdf1 = new java.text.SimpleDateFormat("d-M-yyyy hh:mm:ss aa");
+                sdf1.parse(time1);
+                long diff = currentMili - sdf1.getCalendar().getTimeInMillis();
+                if (diff <= 604800000) { //3600000*/
+                    //System.out.println(actions.get(i).getDescription());
+                    if (actions.get(i).getDescription().compareTo(elementaryAction) == 0 &&
+                            (actions.get(i + 1).getDescription().compareTo(elementaryAction) == 0
+                                    || actions.get(i + 1).getDescription().compareTo(elementaryAction) == 0)) {
 
-            //System.out.println(actions.get(i).getDescription());
-            if (actions.get(i).getDescription().compareTo(elementaryAction) == 0 &&
-                    (actions.get(i + 1).getDescription().compareTo(elementaryAction) == 0
-                            || actions.get(i + 1).getDescription().compareTo(elementaryAction) == 0)) {
-
-                countConsec++;
+                        countConsec++;
 
 
-                if (countConsec == 3) // higher consec doesnt need to count
-                    count++;
+                        if (countConsec == 3) // higher consec doesnt need to count
+                            count++;
 
 
-            } else {
-                countConsec = 0;
+                    } else {
+                        countConsec = 0;
+                    }
+
+            }catch (Exception e){
+
             }
-
         }
 
-
+        System.out.println("Reoccurences for " + elementaryAction + " count: " + count);
         return count;
     }
 
@@ -428,8 +498,12 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         return 0;
     }
 
+    public boolean findQuickVerticalnavigationPattern(){
+        return (getQuickVerticalnavigationPattern() + getQuickHorizontalNavigationPattern()) >= QUICK_SCROLL_ACTIONS_THRESHOLD;
+    }
+
     //Quick Up/Down Scroll pattern means the user is searching and skimming for information
-    public int getQuickVerticalnavigationPattern(){
+    private int getQuickVerticalnavigationPattern(){
         int count = 0;
         int countConsec = 0;
 
@@ -474,7 +548,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     }
 
     //Quick Left/Right Scroll pattern means the user is searching and skimming for information
-    public int getQuickHorizontalNavigationPattern(){
+    private int getQuickHorizontalNavigationPattern(){
         int count = 0;
         int countConsec = 0;
 

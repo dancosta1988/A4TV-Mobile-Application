@@ -57,6 +57,24 @@ public class A4TVAdaptationAndTutorialDialogs {
 
     }
 
+    public AlertDialog.Builder createSuggestionDialog(String title, String message){
+        DialogBuilder bld = new DialogBuilder();
+        AlertDialog.Builder builder = bld.createDialog(context, title, message);
+
+        builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                // accepted
+
+            }
+        })
+                .show();
+
+
+
+        return builder;
+
+    }
+
 
     private void createTutorialDialog1(String title, String message){
 

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:key="user_id"
+        android:title="Nome de Utilizador"
+        android:text="@string/user_id"
+        android:defaultValue="root"
+        android:negativeButtonText="Cancelar"
+        android:positiveButtonText="OK" />
+
+    <ListPreference
+        android:key="user_type"
+        android:title="Caracteristicas do Utilizador"
+        android:entries="@array/pref_user_type_entries"
+        android:entryValues="@array/pref_user_type_values"/>
+
+
+</PreferenceScreen>

@@ -47,10 +47,13 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
     static final int KEY_FAST_FWD = 417;
     static final int KEY_BACK = 461;
 
+    //user type
+    static final int BLIND = 1; //legaly blind
+    static final int PARTIAL = 2; //Low Vision
 
     //reading mode
-    static final int BASIC = 1; //reads all elements
-    static final int ADVANCED = 5; //reads all elements divided by blocks
+    static final int VERBOSE = 1; //reads all elements
+    static final int CONCISE = 2; //reads all elements divided by blocks
 
     //interaction mode
     static final int STANDARD = 1; //all directions are permited for navigation
@@ -76,6 +79,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
     private int readingMode;
     private int focusMode;
     private int userType;
+    private double videoVolume;
     private int interactionMode;
     private String orientation;
     private ArrayList<String> branchs;
@@ -454,6 +458,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
         mp = MediaPlayer.create(context, R.raw.error_earcon);
         userInterfaceEventManager = new A4TVUserInterfaceEventManager(context);
         states = new ArrayList<TVApplicationState>();
+        videoVolume = -1;
     }
 
 
@@ -477,6 +482,8 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
     }
 
     public void setUserType(int uType){ userType = uType; }
+
+    public void setVideoVolume(double volume){ videoVolume = volume; }
 
     public boolean getHasVideoPlayer(){
         System.err.println("Has video player? " + hasVideoPlayer);
@@ -672,7 +679,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
         String elemsBlockText = "";
         String orientation = uimlParser.getPropertyValueFromPartName("L" +blockId,"orientation");
 
-        if(readingMode == A4TVMobileClient.BASIC)
+        if(readingMode == A4TVMobileClient.VERBOSE)
             blockString = "Ínicio de Bloco. ";
 
         for (int temp = 0; temp < elemId.size(); temp++) {
@@ -696,7 +703,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
         if(elemsBlockText.trim().compareTo("") == 0) {
             blockString = "";
         }else {
-            if(readingMode == A4TVMobileClient.BASIC) {
+            if(readingMode == A4TVMobileClient.VERBOSE) {
                 blockString += orientation + ". " + elemsBlockText + " . Fim de Bloco. ";
             }else{
                 blockString += elemsBlockText + " ";
@@ -848,7 +855,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                             states.get(currentStateIndex).addAction(action);
                         }
 
-                        if (readingMode == A4TVMobileClient.BASIC && focusMode == A4TVMobileClient.FOCUS_SIBLINGS) {
+                        if (readingMode == A4TVMobileClient.VERBOSE && focusMode == A4TVMobileClient.FOCUS_SIBLINGS) {
 
                             if (index > 0 && count > 1) {
                                 if (orientation != "" && count > 1) {
@@ -872,7 +879,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                     focusedDesc.add(text);
                 }
 
-                if (readingMode == A4TVMobileClient.BASIC && focusMode == A4TVMobileClient.FOCUS_MAP) {
+                if (readingMode == A4TVMobileClient.VERBOSE && focusMode == A4TVMobileClient.FOCUS_MAP) {
                     //map mode
                     UIMLParser uMap = new UIMLParser();
 
@@ -1070,7 +1077,13 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
         if(out != null){
 
             System.out.println("Sending command for STB: " + cmd);
-            out.println("keycode=" + cmd+ ";usertype=" + userType);
+            if(cmd > 0) {
+                out.println("keycode=" + cmd+ ";usertype=" + userType + ";volume=1.0");
+            }else{
+                out.println("keycode=" + cmd+ ";usertype=" + userType + ";volume=" + videoVolume);
+            }
+
+
             out.flush();
         }
     }
