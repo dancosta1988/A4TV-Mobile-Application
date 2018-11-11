@@ -34,18 +34,33 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
     // Actions table name
     private static final String TABLE_ACTIONS = "actions";
-
+    
     // Actions Table Columns names
-    private static final String KEY_ID = "action_id";
+    private static final String ACTION_ID = "action_id";
+    private static final String ACTION_USER_ID = "user_id";
+    private static final String ACTION_DESCRIPTION = "description";
+    private static final String ACTION_MODALITY = "modality";
+    private static final String ACTION_CURRENT_LEVEL = "current_level";
+    private static final String ACTION_INTERACTION_MODE = "interaction_mode";
+    private static final String ACTION_BLOCK_TYPE = "block_type";
+    private static final String ACTION_BLOCK_ORIENTATION = "block_orientation";
+    private static final String ACTION_ITEM_INDEX = "item_index";
+    private static final String ACTION_DATE = "DATE";
+    
+    //user options table name
+    private static final String TABLE_USER_OPTIONS = "user_options";
+    
+    //User options Columns names
     private static final String USER_ID = "user_id";
-    private static final String KEY_DESCRIPTION = "description";
-    private static final String KEY_MODALITY = "modality";
-    private static final String KEY_CURRENT_LEVEL = "current_level";
-    private static final String KEY_INTERACTION_MODE = "interaction_mode";
-    private static final String KEY_BLOCK_TYPE = "block_type";
-    private static final String KEY_BLOCK_ORIENTATION = "block_orientation";
-    private static final String KEY_ITEM_INDEX = "item_index";
-    private static final String KEY_DATE = "DATE";
+    private static final String USER_READING_MODE = "reading_mode";
+    private static final String USER_FOCUS_MODE = "focus_mode";
+    private static final String USER_INTERACTION_MODE = "interaction_mode";
+    private static final String USER_USER_TYPE = "user_type";
+    private static final String USER_SPEECH_SPEED = "speech_speed";
+    private static final String USER_SPEECH_PITCH = "speech_pitch";
+    private static final String USER_GESTURE_MODE = "gesture_mode";
+    private static final String USER_USE_APP_VOICE = "use_voice";
+
 
     //Thresholds
     static final int IRRELEVANT_ACTIONS_THRESHOLD = 6;
@@ -75,8 +90,8 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
     }
 
-    public void setCurrentUserID(String user_id){
-        currentUserID = user_id;
+    public void setCurrentUserID(String ACTION_USER_ID){
+        currentUserID = ACTION_USER_ID;
     }
     //------------------------ Storing User Interface Events -----------------//
 
@@ -84,9 +99,14 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String CREATE_ACTIONS_TABLE = "CREATE TABLE " + TABLE_ACTIONS + "("
-                + KEY_ID + " TEXT PRIMARY KEY," + USER_ID + " TEXT,"+ KEY_DESCRIPTION + " TEXT," + KEY_BLOCK_TYPE + " TEXT," + KEY_BLOCK_ORIENTATION + " TEXT," + KEY_ITEM_INDEX + " TEXT,"
-                + KEY_MODALITY + " TEXT, " + KEY_CURRENT_LEVEL + " TEXT," + KEY_INTERACTION_MODE + " TEXT," + KEY_DATE + " DATE )";
+                + ACTION_ID + " TEXT PRIMARY KEY," + ACTION_USER_ID + " TEXT,"+ ACTION_DESCRIPTION + " TEXT," + ACTION_BLOCK_TYPE + " TEXT," + ACTION_BLOCK_ORIENTATION + " TEXT," + ACTION_ITEM_INDEX + " TEXT,"
+                + ACTION_MODALITY + " TEXT, " + ACTION_CURRENT_LEVEL + " TEXT," + ACTION_INTERACTION_MODE + " TEXT," + ACTION_DATE + " DATE )";
         db.execSQL(CREATE_ACTIONS_TABLE);
+
+        String CREATE_USER_TABLE = "CREATE TABLE " + TABLE_USER_OPTIONS + "("
+                + USER_ID + " TEXT PRIMARY KEY," + USER_READING_MODE + " TEXT,"+ USER_FOCUS_MODE + " TEXT," + USER_INTERACTION_MODE + " TEXT," + USER_USER_TYPE + " TEXT," + USER_GESTURE_MODE + " TEXT,"
+                + USER_SPEECH_SPEED + " TEXT, " + USER_SPEECH_PITCH + " TEXT, " + USER_USE_APP_VOICE + " TEXT )";
+        db.execSQL(CREATE_USER_TABLE);
     }
 
     // Upgrading database
@@ -94,7 +114,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Drop older table if existed
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ACTIONS);
-
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_OPTIONS);
         // Create tables again
         onCreate(db);
     }
@@ -102,12 +122,87 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     public void deleteStorage(){
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ACTIONS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_OPTIONS);
         onCreate(db);
     }
 
     /**
      * All CRUD(Create, Read, Update, Delete) Operations
      */
+
+    // Adding new user
+    public void addUser(String user_id){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(USER_ID, user_id);
+        values.put(USER_READING_MODE, "1");
+        values.put(USER_FOCUS_MODE, "1");
+        values.put(USER_INTERACTION_MODE, "1");
+        values.put(USER_USER_TYPE, "1");
+        values.put(USER_GESTURE_MODE, "0");
+        values.put(USER_SPEECH_SPEED, "1.0");
+        values.put(USER_SPEECH_PITCH, "1.0");
+        values.put(USER_USE_APP_VOICE, "true");
+
+        // Inserting Row
+        db.insert(TABLE_USER_OPTIONS, null, values);
+        db.close(); // Closing database connection
+
+    }
+
+    public void updateUserOption( String option, String value){
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(option, value);
+
+        // Inserting Row
+        db.update(TABLE_USER_OPTIONS, values, USER_ID + "='" + currentUserID + "'", null );
+        db.close(); // Closing database connection
+
+    }
+
+    public void updateUserOptions(String reading_mode, String focus_mode, String interaction_mode, String user_type, String gesture_mode, String speech_speed, String speech_pitch, String use_voice ){
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(USER_READING_MODE, reading_mode);
+        values.put(USER_FOCUS_MODE, focus_mode);
+        values.put(USER_INTERACTION_MODE, interaction_mode);
+        values.put(USER_USER_TYPE, user_type);
+        values.put(USER_GESTURE_MODE, gesture_mode);
+        values.put(USER_SPEECH_SPEED, speech_speed);
+        values.put(USER_SPEECH_PITCH, speech_pitch);
+        values.put(USER_USE_APP_VOICE, use_voice);
+
+
+
+        // Inserting Row
+        int result = db.update(TABLE_USER_OPTIONS, values, USER_ID + "='" + currentUserID + "'", null );
+        System.err.println( "Updating User: " + currentUserID + " use voice: " + use_voice + " result " + result);
+        db.close(); // Closing database connection
+
+    }
+
+    public User getUserOptions(){
+        String selectQuery = "SELECT  * FROM " + TABLE_USER_OPTIONS + " WHERE " + USER_ID + " = '" + currentUserID + "'";
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        User user = null;
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+
+                user = new User(cursor.getString(0), cursor.getString(1), cursor.getString(2),cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6),cursor.getString(7), cursor.getString(8));
+            System.err.println( "Getting User: " + currentUserID + " use voice: " + cursor.getString(8) + " getting boolean " + Boolean.valueOf(cursor.getString(8)));
+        }
+
+        // return contact list
+        return user;
+    }
 
     // Adding new action
     public Action addAction(String description, String block_type, String block_orientation, String item_index, String modality, String current_level, String interaction_mode) {
@@ -124,20 +219,20 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         //int _id = (int)Integer.getInteger(datetime);
 
         ContentValues values = new ContentValues();
-        values.put(KEY_ID, _id);
-        values.put(USER_ID, currentUserID);
-        values.put(KEY_DESCRIPTION, description);
-        values.put(KEY_BLOCK_TYPE, block_type);
-        values.put(KEY_BLOCK_ORIENTATION, block_orientation);
-        values.put(KEY_ITEM_INDEX, item_index);
-        values.put(KEY_MODALITY, modality);
-        values.put(KEY_CURRENT_LEVEL, current_level);
-        values.put(KEY_INTERACTION_MODE, interaction_mode);
+        values.put(ACTION_ID, _id);
+        values.put(ACTION_USER_ID, currentUserID);
+        values.put(ACTION_DESCRIPTION, description);
+        values.put(ACTION_BLOCK_TYPE, block_type);
+        values.put(ACTION_BLOCK_ORIENTATION, block_orientation);
+        values.put(ACTION_ITEM_INDEX, item_index);
+        values.put(ACTION_MODALITY, modality);
+        values.put(ACTION_CURRENT_LEVEL, current_level);
+        values.put(ACTION_INTERACTION_MODE, interaction_mode);
 
         dateformat = new SimpleDateFormat("d-M-yyyy hh:mm:ss aa");
         datetime = dateformat.format(date);
 
-        values.put(KEY_DATE, datetime);
+        values.put(ACTION_DATE, datetime);
         System.err.println("Storing action id: " + _id + " description:" + description + " using " + modality + " at " + datetime);
         System.err.println("Stored ui info - selected item: " + item_index +" from block with type:" + block_type + " orientation: " + block_orientation);
 
@@ -153,8 +248,8 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     Contact getContact(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.query(TABLE_CONTACTS, new String[] { KEY_ID,
-                        KEY_NAME, KEY_PH_NO }, KEY_ID + "=?",
+        Cursor cursor = db.query(TABLE_CONTACTS, new String[] { ACTION_ID,
+                        ACTION_NAME, ACTION_PH_NO }, ACTION_ID + "=?",
                 new String[] { String.valueOf(id) }, null, null, null, null);
         if (cursor != null)
             cursor.moveToFirst();
@@ -169,7 +264,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     public List<Action> getAllActions() {
         List<Action> actionList = new ArrayList<Action>();
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + USER_ID + " = '" + currentUserID + "'";
+        String selectQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + ACTION_USER_ID + " = '" + currentUserID + "'";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -190,7 +285,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
     // Getting actions Count
     public int getAllActionsCount() {
-        String countQuery = "SELECT  * FROM " + TABLE_ACTIONS  + " WHERE " + USER_ID + " = '" + currentUserID + "'";
+        String countQuery = "SELECT  * FROM " + TABLE_ACTIONS  + " WHERE " + ACTION_USER_ID + " = '" + currentUserID + "'";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
 
@@ -205,7 +300,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     public List<Action> getSpecificActions(String desc) {
         List<Action> actionList = new ArrayList<Action>();
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + KEY_DESCRIPTION +" = '" + desc + "'" + " AND " + USER_ID + " = '" + currentUserID + "'";
+        String selectQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + ACTION_DESCRIPTION +" = '" + desc + "'" + " AND " + ACTION_USER_ID + " = '" + currentUserID + "'";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -227,7 +322,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     public List<Action> getActionsExcept(String desc) {
         List<Action> actionList = new ArrayList<Action>();
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + KEY_DESCRIPTION +" != '" + desc + "' AND " + USER_ID + " = '" + currentUserID + "'";
+        String selectQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + ACTION_DESCRIPTION +" != '" + desc + "' AND " + ACTION_USER_ID + " = '" + currentUserID + "'";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -247,7 +342,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
     // Getting a specific action Count
     public int getActionCount(String desc) {
-        String countQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + KEY_DESCRIPTION +" = '" + desc + "'" + " AND " + USER_ID + " = '" + currentUserID + "'";
+        String countQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + ACTION_DESCRIPTION +" = '" + desc + "'" + " AND " + ACTION_USER_ID + " = '" + currentUserID + "'";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
         int count =cursor.getCount();
@@ -259,7 +354,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
     // Getting a specific level action Count
     public int getActionCountByLevel(String level) {
-        String countQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + KEY_CURRENT_LEVEL +" LIKE '" + level + "%'" + " AND " + USER_ID + " = '" + currentUserID + "'";
+        String countQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + ACTION_CURRENT_LEVEL +" LIKE '" + level + "%'" + " AND " + ACTION_USER_ID + " = '" + currentUserID + "'";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
         int count =cursor.getCount();
@@ -273,7 +368,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     public List<Action> getActionsByLevel(String level) {
         List<Action> actionList = new ArrayList<Action>();
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + KEY_CURRENT_LEVEL +" LIKE '" + level + "%'" + " AND " + USER_ID + " = '" + currentUserID + "'";
+        String selectQuery = "SELECT  * FROM " + TABLE_ACTIONS + " WHERE " + ACTION_CURRENT_LEVEL +" LIKE '" + level + "%'" + " AND " + ACTION_USER_ID + " = '" + currentUserID + "'";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);

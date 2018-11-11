@@ -11,17 +11,17 @@ import java.util.UUID;
 
 public class Action {
 
-    //private variables
-    String _id;
-    String _user_id;
-    String _description;
-    String _block_type;
-    String _block_orientation;
-    String _item_index;
-    String _modality;
-    String _current_level;
-    String _interaction_mode;
-    String _date;
+    //public variables
+    public String _id;
+    public String _user_id;
+    public String _description;
+    public String _block_type;
+    public String _block_orientation;
+    public String _item_index;
+    public String _modality;
+    public String _current_level;
+    public String _interaction_mode;
+    public String _date;
 
     // constructor
     public Action(String _id, String _user_id, String _description, String _block_type, String _block_orientation, String _item_index, String _modality, String _current_level, String _interaction_mode, String _date){

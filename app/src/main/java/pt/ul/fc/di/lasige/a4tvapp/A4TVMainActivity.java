@@ -48,6 +48,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
     private A4TVMobileClient mobileClient;
     private A4TVAdaptationAndTutorialDialogs dialogs;
     private boolean firstTime = true;
+    private String currentUser = "";
     private String ipAdd = "192.168.1.7";
     private boolean useTTS = false;
     private int readingMode;
@@ -430,18 +431,64 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
         checkTTS();
         //start ui event manager
         userInterfaceEventManager = new A4TVUserInterfaceEventManager(this);
+
+
         //start dialog manager
         dialogs = new A4TVAdaptationAndTutorialDialogs(this);
 
-        initiateServer();
 
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if(sharedPrefs.getBoolean("delete_storage", false)){
+            deleteStorage();
+            SharedPreferences.Editor editor = sharedPrefs.edit();
+            editor.putBoolean("delete_storage", false);
+            editor.commit();
 
-
-        if(!userInterfaceEventManager.hasUserDoneTutorial()) {
-            //run tutorial
-            dialogs.startTutorial();
-            userInterfaceEventManager.addAction("begin_tutorial", "-", "-" , "-" ,"none", readingMode + "." + focusMode, interactMode + "");
         }
+
+        String newUser = sharedPrefs.getString("user_id", "root");
+        System.err.println( "Current: " + currentUser + " new user: " + newUser);
+        userInterfaceEventManager.setCurrentUserID(newUser);
+        currentUser = newUser;
+
+        if(userInterfaceEventManager.getUserOptions() != null){
+
+
+            getUserPreferences();
+            storeUserPreferences();
+            //not new
+            System.err.println( "Not new user");
+            User user = userInterfaceEventManager.getUserOptions();
+            SharedPreferences.Editor editor = sharedPrefs.edit();
+            System.err.println( "User: " + currentUser + " useTTS: " + user._use_voice);
+            editor.putString("focus_preference", user._focus_mode);
+            editor.putString("reading_preference", user._reading_mode);
+            editor.putString("interact_preference", user._interaction_mode);
+            editor.putString("gesture_preference", user._gesture_mode);
+            editor.putString("user_type", user._user_type);
+            editor.putString("configure_speed", user._speech_speed);
+            editor.putString("configure_pitch", user._speech_pitch);
+            editor.putBoolean("TTS Preference Source", Boolean.valueOf(user._use_voice));
+            editor.commit();
+
+            //getUserPreferences();
+
+        }else{
+
+            //new user!
+            System.err.println( "It is a new user");
+            userInterfaceEventManager.addUser(newUser);
+
+            if (!userInterfaceEventManager.hasUserDoneTutorial()) {
+                //run tutorial
+                dialogs.startTutorial();
+                userInterfaceEventManager.addAction("begin_tutorial", "-", "-", "-", "none", readingMode + "." + focusMode, interactMode + "");
+                getUserPreferences();
+                storeUserPreferences();
+            }
+        }
+
+
 
         if(userInterfaceEventManager.isTimeToCheckEvents())
             checkForAccessibilityIssues();
@@ -660,25 +707,10 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
         startActivityForResult(check, CHECK_CODE);
     }
 
-    private void initiateServer(){
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if(sharedPrefs.getBoolean("delete_storage", false)){
-            deleteStorage();
-            SharedPreferences.Editor editor = sharedPrefs.edit();
-            editor.putBoolean("delete_storage", false);
-            editor.commit();
-
-        }else {
-            getUserPreferences();
-        }
-
-
-    }
-
     private void getUserPreferences(){
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        useTTS = sharedPrefs.getBoolean("TTS Preference Source", false);
+        useTTS = sharedPrefs.getBoolean("TTS Preference Source", true);
         readingMode = Integer.parseInt(sharedPrefs.getString("reading_preference", "1"));
         interactMode = Integer.parseInt(sharedPrefs.getString("interact_preference", "1"));
         focusMode = Integer.parseInt(sharedPrefs.getString("focus_preference", "1"));
@@ -687,7 +719,10 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
         speechSpeed = Float.parseFloat(sharedPrefs.getString("configure_speed", "1.0"));
         gestureMode = Integer.parseInt(sharedPrefs.getString("gesture_preference", "0"));
         ipAdd = sharedPrefs.getString("Set-Top Box IP address", ipAdd);
-        userInterfaceEventManager.setCurrentUserID(sharedPrefs.getString("user_id", "root"));
+    }
+
+    private void storeUserPreferences(){
+        userInterfaceEventManager.updateUserOptions(readingMode+"",focusMode+"",interactMode+"",userType+"",gestureMode+"",speechSpeed+"",speechPitch+"",useTTS+"");
     }
 
     public static void showButtons(){

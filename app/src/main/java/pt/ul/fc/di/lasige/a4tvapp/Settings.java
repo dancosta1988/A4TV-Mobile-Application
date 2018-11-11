@@ -217,7 +217,9 @@ public class Settings extends AppCompatPreferenceActivity {
         public boolean onOptionsItemSelected(MenuItem item) {
             int id = item.getItemId();
             if (id == android.R.id.home) {
-                startActivity(new Intent(getActivity(), Settings.class));
+                Intent backToHomeActivityIntent = new Intent(getActivity(), Settings.class);
+                backToHomeActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(backToHomeActivityIntent);
                 return true;
             }
             return super.onOptionsItemSelected(item);
@@ -247,7 +249,9 @@ public class Settings extends AppCompatPreferenceActivity {
         public boolean onOptionsItemSelected(MenuItem item) {
             int id = item.getItemId();
             if (id == android.R.id.home) {
-                startActivity(new Intent(getActivity(), Settings.class));
+                Intent backToHomeActivityIntent = new Intent(getActivity(), Settings.class);
+                backToHomeActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(backToHomeActivityIntent);
                 return true;
             }
             return super.onOptionsItemSelected(item);
@@ -278,7 +282,9 @@ public class Settings extends AppCompatPreferenceActivity {
             int id = item.getItemId();
             System.err.println( "Item id: " + id);
             if (id == android.R.id.home) {
-                startActivity(new Intent(getActivity(), Settings.class));
+                Intent backToHomeActivityIntent = new Intent(getActivity(), Settings.class);
+                backToHomeActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(backToHomeActivityIntent);
                 return true;
             }
             return super.onOptionsItemSelected(item);
@@ -309,7 +315,9 @@ public class Settings extends AppCompatPreferenceActivity {
             int id = item.getItemId();
             System.err.println( "Item id: " + id);
             if (id == android.R.id.home) {
-                startActivity(new Intent(getActivity(), Settings.class));
+                Intent backToHomeActivityIntent = new Intent(getActivity(), Settings.class);
+                backToHomeActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(backToHomeActivityIntent);
                 return true;
             }
             return super.onOptionsItemSelected(item);
@@ -340,7 +348,9 @@ public class Settings extends AppCompatPreferenceActivity {
             int id = item.getItemId();
             System.err.println( "Item id: " + id);
             if (id == android.R.id.home) {
-                startActivity(new Intent(getActivity(), Settings.class));
+                Intent backToHomeActivityIntent = new Intent(getActivity(), Settings.class);
+                backToHomeActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(backToHomeActivityIntent);
                 return true;
             }
             return super.onOptionsItemSelected(item);
