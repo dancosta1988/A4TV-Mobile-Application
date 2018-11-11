@@ -11,6 +11,21 @@ import java.util.UUID;
 
 public class Action {
 
+    public static final String CONNECT = "connect";
+    public static final String DISCONNECT = "diconnect";
+    public static final String LOCALIZE = "localize";
+    public static final String READ_SCREEN = "read_screen";
+    public static final String START_SPEECH = "start_speech";
+    public static final String UP = "up";
+    public static final String DOWN = "down";
+    public static final String LEFT = "left";
+    public static final String RIGHT = "right";
+    public static final String OK = "ok";
+    public static final String BEGIN_TUTORIAL = "begin_tutorial";
+    public static final String CHECK_USER_EVENTS = "connect";
+    public static final String CURRENT_BLOCK_INFO = "connect";
+    
+    
     //public variables
     public String _id;
     public String _user_id;

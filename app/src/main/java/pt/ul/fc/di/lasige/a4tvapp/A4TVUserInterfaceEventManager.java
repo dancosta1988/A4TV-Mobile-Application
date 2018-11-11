@@ -66,7 +66,10 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     static final int IRRELEVANT_ACTIONS_THRESHOLD = 6;
     static final int REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD = 6;
     static final int REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD = 6;
-    static final int REOCCURENCE_SPEECH_ACTIONS_THRESHOLD = 3;
+    static final int REOCCURENCE_SPEECH_ACTIONS_THRESHOLD = 6;
+    static final int SHORT_REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD = 3;
+    static final int SHORT_REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD = 3;
+    static final int SHORT_REOCCURENCE_SPEECH_ACTIONS_THRESHOLD = 3;
     static final int QUICK_SCROLL_ACTIONS_THRESHOLD = 6;
     static final int LOST_AWARENESS_ACTIONS_THRESHOLD = 6;
     static final int LONG_CHECK_ACTIONS_THRESHOLD = 6685; //Average 191 actions per hour (7 days x 5 hours = 6685)
@@ -74,7 +77,8 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
 
     private int NumberOfErrors = 0;
-
+    private String lastAction = "";
+    private int startSpeechInRow = 1;
     private String currentUserID;
 
 
@@ -233,14 +237,20 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         datetime = dateformat.format(date);
 
         values.put(ACTION_DATE, datetime);
-        System.err.println("Storing action id: " + _id + " description:" + description + " using " + modality + " at " + datetime);
-        System.err.println("Stored ui info - selected item: " + item_index +" from block with type:" + block_type + " orientation: " + block_orientation);
+        //System.err.println("Storing action id: " + _id + " description:" + description + " using " + modality + " at " + datetime);
+        //System.err.println("Stored ui info - selected item: " + item_index +" from block with type:" + block_type + " orientation: " + block_orientation);
 
 
         // Inserting Row
         db.insert(TABLE_ACTIONS, null, values);
         db.close(); // Closing database connection
 
+        if(description.compareTo(lastAction) == 0 && description.compareTo(Action.START_SPEECH) == 0){
+            startSpeechInRow++;
+        }else{
+            startSpeechInRow = 1;
+        }
+        lastAction = description;
         return new Action(_id, currentUserID, description, block_type, block_orientation, item_index, modality, current_level, interaction_mode, datetime);
     }
 
@@ -439,7 +449,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     //------------------------ Analyze User Interface Events -----------------//
 
     public boolean hasUserDoneTutorial(){
-        return getActionCount("begin_tutorial") > 0;
+        return getActionCount(Action.BEGIN_TUTORIAL) > 0;
     }
 
     public boolean isUserExperiencedWithVerbose() {
@@ -455,7 +465,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         boolean needCheck = false;
         int i = actions.size()-1;
         if(actions.size() > 0) {
-            while ( i >= 0 && actions.get(i).getDescription().compareTo("check_user_events") != 0)
+            while ( i >= 0 && actions.get(i).getDescription().compareTo(Action.CHECK_USER_EVENTS) != 0)
             {
                 i--;
             }
@@ -470,7 +480,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         float count = 0;
 
 
-        List<Action> actions = getActionsExcept("current_block_info");
+        List<Action> actions = getActionsExcept(Action.CURRENT_BLOCK_INFO);
         for (int i = 0; i < actions.size(); i++) {
 
             if(actions.get(i).getModality().compareTo("button") == 0 )
@@ -498,7 +508,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         Long currentMili = new Date().getTime();
 
 
-        List<Action> actions = getSpecificActions("current_block_info");
+        List<Action> actions = getSpecificActions(Action.CURRENT_BLOCK_INFO);
         for (int i = 0; i < actions.size()-4; i+=2) {
             try {
 
@@ -526,12 +536,33 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         return count >= IRRELEVANT_ACTIONS_THRESHOLD;
     }
 
-    public boolean findReOccurencePattern(String elementaryAction) {
+    public boolean findReOccurencePattern(String elementaryAction, boolean longTerm) {
         boolean found = false;
-        switch (elementaryAction){
-            case "localize": found = getReOccurencePattern(elementaryAction, LONG_CHECK_ACTIONS_THRESHOLD) >= REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD; break;
-            case "read_screen": found = getReOccurencePattern(elementaryAction, LONG_CHECK_ACTIONS_THRESHOLD) >= REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD; break;
-            case "start_speech": found = getReOccurencePattern(elementaryAction, SHORT_CHECK_ACTIONS_THRESHOLD) >= REOCCURENCE_SPEECH_ACTIONS_THRESHOLD; break;
+        if(longTerm) {
+            switch (elementaryAction) {
+                case Action.LOCALIZE:
+                    found = getReOccurencePattern(elementaryAction, LONG_CHECK_ACTIONS_THRESHOLD) >= REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD;
+                    break;
+                case Action.READ_SCREEN:
+                    found = getReOccurencePattern(elementaryAction, LONG_CHECK_ACTIONS_THRESHOLD) >= REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD;
+                    break;
+                case Action.START_SPEECH:
+                    found = getReOccurencePattern(elementaryAction, LONG_CHECK_ACTIONS_THRESHOLD) >= REOCCURENCE_SPEECH_ACTIONS_THRESHOLD;
+                    break;
+            }
+        }else{
+            switch (elementaryAction) {
+                case Action.LOCALIZE:
+
+                    break;
+                case Action.READ_SCREEN:
+
+                    break;
+                case Action.START_SPEECH:
+                    System.err.println("startSpeechInRow " + startSpeechInRow);
+                    found = (startSpeechInRow >= SHORT_REOCCURENCE_SPEECH_ACTIONS_THRESHOLD);
+                    break;
+            }
         }
         return found;
     }
@@ -541,7 +572,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         int count = 0;
         int countConsec = 0;
         //Long currentMili = new Date().getTime();
-        List<Action> actions = getActionsExcept("current_block_info");
+        List<Action> actions = getActionsExcept(Action.CURRENT_BLOCK_INFO);
         if(actions.size() > lastNumberofActions)
             actions = actions.subList(actions.size()-lastNumberofActions-1,actions.size()-1);
         System.out.println(actions.size());
@@ -602,7 +633,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         int count = 0;
         int countConsec = 0;
 
-        List<Action> actions = getActionsExcept("current_block_info");
+        List<Action> actions = getActionsExcept(Action.CURRENT_BLOCK_INFO);
 
         for (int i = 0; i < actions.size() - 1; i++) {
 
@@ -617,7 +648,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
                 if ((actions.get(i).getDescription().compareTo("up") == 0 || actions.get(i).getDescription().compareTo("down") == 0) &&
                         ((actions.get(i + 1).getDescription().compareTo("up") == 0 || actions.get(i + 1).getDescription().compareTo("down") == 0)
-                                || (actions.get(i + 1).getDescription().compareTo("start_speech") == 0 && (actions.get(i + 2).getDescription().compareTo("up") == 0
+                                || (actions.get(i + 1).getDescription().compareTo(Action.START_SPEECH) == 0 && (actions.get(i + 2).getDescription().compareTo("up") == 0
                                 || actions.get(i + 2).getDescription().compareTo("down") == 0))) &&
                         ((actions.get(i).getModality().compareTo("button") == 0 && diff <= 4000) ||
                                 (actions.get(i).getModality().compareTo("speech") == 0 && diff <= 6000) ||
@@ -647,7 +678,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         int count = 0;
         int countConsec = 0;
 
-        List<Action> actions = getActionsExcept("current_block_info");
+        List<Action> actions = getActionsExcept(Action.CURRENT_BLOCK_INFO);
 
         for (int i = 0; i < actions.size() - 1; i++) {
 
@@ -665,7 +696,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
                 System.out.println("Modality: "+ actions.get(i).getModality() + " Diff =" + diff);*/
                 if ((actions.get(i).getDescription().compareTo("left") == 0 || actions.get(i).getDescription().compareTo("right") == 0) &&
                         ((actions.get(i + 1).getDescription().compareTo("left") == 0 || actions.get(i + 1).getDescription().compareTo("right") == 0)
-                                || (actions.get(i + 1).getDescription().compareTo("start_speech") == 0 && (actions.get(i + 2).getDescription().compareTo("left") == 0
+                                || (actions.get(i + 1).getDescription().compareTo(Action.START_SPEECH) == 0 && (actions.get(i + 2).getDescription().compareTo("left") == 0
                                 || actions.get(i + 2).getDescription().compareTo("right") == 0))) &&
                         ((actions.get(i).getModality().compareTo("button") == 0 && diff <= 4000) ||
                                 (actions.get(i).getModality().compareTo("speech") == 0 && diff <= 6000) ||
@@ -709,9 +740,9 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         List<Action> actions = getAllActions();
         for (int i = 0; i < actions.size()-2; i++) {
 
-            if(actions.get(i).getDescription().compareTo("current_block_info") == 0 && actions.get(i+1).getDescription().compareTo("current_block_info") != 0){
+            if(actions.get(i).getDescription().compareTo(Action.CURRENT_BLOCK_INFO) == 0 && actions.get(i+1).getDescription().compareTo(Action.CURRENT_BLOCK_INFO) != 0){
 
-                if(actions.get(i+1).getDescription().compareTo("localize") == 0 || actions.get(i+2).getDescription().compareTo("localize") == 0){
+                if(actions.get(i+1).getDescription().compareTo(Action.LOCALIZE) == 0 || actions.get(i+2).getDescription().compareTo(Action.LOCALIZE) == 0){
 
                     countConsec++;
 
