@@ -518,66 +518,55 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
             getUserPreferences();
         }
 
-        if(userInterfaceEventManager.findIrrelevantActionsPattern()) {
-            if(readingMode == A4TVMobileClient.CONCISE)
-                dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que está enviar comandos que não produzem efeito," +
-                        " deseja passar para o modo detalhado?", "reading_preference", A4TVMobileClient.VERBOSE+"").show();
-            else if(readingMode == A4TVMobileClient.VERBOSE) {
-                if(focusMode == A4TVMobileClient.FOCUS_SIBLINGS)
-                    dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que está enviar comandos que não produzem efeito," +
-                            " deseja experimentar outra versão do modo detalhado?", "focus_preference", A4TVMobileClient.FOCUS_MAP+"").show();
-                else
-                    dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que está enviar comandos que não produzem efeito," +
-                            " deseja experimentar outra versão do modo detalhado?", "focus_preference", A4TVMobileClient.FOCUS_SIBLINGS+"").show();
-            }
+        boolean irActions = userInterfaceEventManager.findIrrelevantActionsPattern();
+        boolean reLocalize = userInterfaceEventManager.findReOccurencePattern(Action.LOCALIZE, true);
+        boolean reReadScreen = userInterfaceEventManager.findReOccurencePattern(Action.READ_SCREEN, true);
+        boolean quickScroll = userInterfaceEventManager.findQuickVerticalnavigationPattern();
 
-            if(userType == A4TVMobileClient.PARTIAL)
-                // Change contrast and font-size values
-
-            getUserPreferences();
+        String dialogText = "A aplicação detectou que ";
+        if(irActions){
+            dialogText += " enviou comandos que não produziram efeito, ";
+        }
+        if(reLocalize) {
+            dialogText += " usou muitas vezes o localizar, ";
+        }
+        if(reReadScreen) {
+            dialogText += " usou muitas vezes o ler ecrã, ";
+        }
+        if(quickScroll) {
+            dialogText += " navega rapidamente nas aplicações de TV, ";
         }
 
-        if(userInterfaceEventManager.findReOccurencePattern(Action.LOCALIZE, true)) {
-            if(readingMode == A4TVMobileClient.CONCISE)
-                dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que usa muitas vezes o localizar," +
+        if(irActions || reLocalize || reReadScreen || quickScroll) {
+            if (readingMode == A4TVMobileClient.CONCISE && (irActions || reLocalize || reReadScreen)) {
+                dialogs.createAdaptationDialog("Sugestão", dialogText +
                         " deseja passar para o modo detalhado?", "reading_preference", A4TVMobileClient.VERBOSE + "").show();
-             else if(readingMode == A4TVMobileClient.VERBOSE) {
-                if (focusMode == A4TVMobileClient.FOCUS_SIBLINGS)
-                    dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que usa muitas vezes o localizar, " +
-                            "deseja experimentar outra versão do modo detalhado?", "focus_preference", A4TVMobileClient.FOCUS_MAP + "").show();
-                else
-                    dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que usa muitas vezes o localizar," +
-                            " deseja experimentar outra versão do modo detalhado?", "focus_preference", A4TVMobileClient.FOCUS_SIBLINGS + "").show();
-            }
-            getUserPreferences();
-        }
-
-        if(userInterfaceEventManager.findReOccurencePattern(Action.READ_SCREEN, true)) {
-            if(readingMode == A4TVMobileClient.CONCISE)
-                dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que usa muitas vezes o ler ecrã," +
-                        " deseja passar para o modo detalhado?", "reading_preference", A4TVMobileClient.VERBOSE + "").show();
-            else if(readingMode == A4TVMobileClient.VERBOSE) {
-                double newSpeed = (speechSpeed - 0.2);
-                if(newSpeed < 0)
-                    newSpeed = 0;
-                dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que usa muitas vezes o ler ecrã," +
-                        " deseja diminuir a velocidade de leitura?", "configure_speed", newSpeed + "").show();
-
-            }
-            getUserPreferences();
-        }
-
-        if(userInterfaceEventManager.findQuickVerticalnavigationPattern()) {
-            if(readingMode == A4TVMobileClient.CONCISE) {
+            } else if (readingMode == A4TVMobileClient.CONCISE && quickScroll){
                 double newSpeed = (speechSpeed + 0.2);
                 if(newSpeed < 0)
                     newSpeed = 0;
-                dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que navega rapidamente nas aplicações de TV, " +
+                dialogs.createAdaptationDialog("Sugestão", dialogText +
                         "deseja aumentar a velocidade de leitura?", "configure_speed", newSpeed + "").show();
-            }else if(readingMode == A4TVMobileClient.VERBOSE) {
-                dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que navega rapidamente nas aplicações de TV," +
+            } else if(readingMode == A4TVMobileClient.VERBOSE && (irActions || reLocalize)){
+
+                if(focusMode == A4TVMobileClient.FOCUS_SIBLINGS)
+                    dialogs.createAdaptationDialog("Sugestão", dialogText +
+                            " deseja experimentar outra versão do modo detalhado?", "focus_preference", A4TVMobileClient.FOCUS_MAP+"").show();
+                else
+                    dialogs.createAdaptationDialog("Sugestão", dialogText +
+                            " deseja experimentar outra versão do modo detalhado?", "focus_preference", A4TVMobileClient.FOCUS_SIBLINGS+"").show();
+
+            }else if(readingMode == A4TVMobileClient.VERBOSE && reReadScreen){
+                double newSpeed = (speechSpeed - 0.2);
+                if(newSpeed < 0)
+                    newSpeed = 0;
+                dialogs.createAdaptationDialog("Sugestão", dialogText +
+                        " deseja diminuir a velocidade de leitura?", "configure_speed", newSpeed + "").show();
+            }else if(readingMode == A4TVMobileClient.VERBOSE && quickScroll){
+                dialogs.createAdaptationDialog("Sugestão", dialogText +
                         " deseja passar para o modo conciso?", "reading_preference", A4TVMobileClient.CONCISE + "").show();
             }
+
             getUserPreferences();
         }
 
