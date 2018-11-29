@@ -602,6 +602,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                         //lastMsg = fromServer;
                         stopSpeech();
                         System.err.println("Same msg!!!");
+                        userInterfaceEventManager.increaseIrrelevantActions();
                         ArrayList<Action> actions = new ArrayList<Action>();
                         actions.addAll(states.get(currentStateIndex).getActions());
                         for (Action a : actions) {
@@ -610,12 +611,23 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
 
 
                         if(useTTS) {
-                            mp.start();
+                            if(userInterfaceEventManager.findIrrelevantActionsPattern(false)){
+                                if(readingMode == CONCISE) {
+                                    readingMode = VERBOSE;
+                                    readFocusedElements(false);
+                                    readingMode = CONCISE;
+                                }else{
+                                    readFocusedElements(false);
+                                }
+                            }else {
+                                mp.start();
+                            }
                         }
 
 
 
                     }else {
+                        userInterfaceEventManager.resetIrrelevantActions();
                         lastMsg = fromServer;
                         stopSpeech();
                         TVApplicationState newState = new TVApplicationState();

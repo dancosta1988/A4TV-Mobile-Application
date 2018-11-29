@@ -64,6 +64,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
     //Thresholds
     static final int IRRELEVANT_ACTIONS_THRESHOLD = 6;
+    static final int SHORT_IRRELEVANT_ACTIONS_THRESHOLD = 3;
     static final int REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD = 6;
     static final int REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD = 6;
     static final int REOCCURENCE_SPEECH_ACTIONS_THRESHOLD = 6;
@@ -78,7 +79,9 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
     private int NumberOfErrors = 0;
     private String lastAction = "";
+    private String lastIndex = "";
     private int startSpeechInRow = 1;
+    private int irrelevantActionsInRow = 0;
     private String currentUserID;
 
 
@@ -250,6 +253,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         }else{
             startSpeechInRow = 1;
         }
+
         lastAction = description;
         return new Action(_id, currentUserID, description, block_type, block_orientation, item_index, modality, current_level, interaction_mode, datetime);
     }
@@ -503,7 +507,25 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
     //Irrelevant Actions, when the user performs irrelevant actions during a task
     //Actions that result in the same index will be considered irrelevant
-    public boolean findIrrelevantActionsPattern(){
+    public boolean findIrrelevantActionsPattern(boolean longTerm) {
+        boolean found = false;
+        if(longTerm) {
+            found = getIrrelanvActionsPattern();
+        }else{
+            found = (irrelevantActionsInRow >= SHORT_IRRELEVANT_ACTIONS_THRESHOLD);
+        }
+        return found;
+    }
+
+    public void increaseIrrelevantActions(){
+            irrelevantActionsInRow++;
+    }
+
+    public void resetIrrelevantActions(){
+        irrelevantActionsInRow = 0;
+    }
+
+    private boolean getIrrelanvActionsPattern(){
         int count = 0;
         Long currentMili = new Date().getTime();
 

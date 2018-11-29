@@ -518,7 +518,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
             getUserPreferences();
         }
 
-        boolean irActions = userInterfaceEventManager.findIrrelevantActionsPattern();
+        boolean irActions = userInterfaceEventManager.findIrrelevantActionsPattern(true);
         boolean reLocalize = userInterfaceEventManager.findReOccurencePattern(Action.LOCALIZE, true);
         boolean reReadScreen = userInterfaceEventManager.findReOccurencePattern(Action.READ_SCREEN, true);
         boolean quickScroll = userInterfaceEventManager.findQuickVerticalnavigationPattern();
