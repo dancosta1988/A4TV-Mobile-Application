@@ -51,15 +51,16 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     private static final String TABLE_USER_OPTIONS = "user_options";
     
     //User options Columns names
-    private static final String USER_ID = "user_id";
-    private static final String USER_READING_MODE = "reading_mode";
-    private static final String USER_FOCUS_MODE = "focus_mode";
-    private static final String USER_INTERACTION_MODE = "interaction_mode";
-    private static final String USER_USER_TYPE = "user_type";
-    private static final String USER_SPEECH_SPEED = "speech_speed";
-    private static final String USER_SPEECH_PITCH = "speech_pitch";
-    private static final String USER_GESTURE_MODE = "gesture_mode";
-    private static final String USER_USE_APP_VOICE = "use_voice";
+    public static final String USER_ID = "user_id";
+    public static final String USER_READING_MODE = "reading_mode";
+    public static final String USER_FOCUS_MODE = "focus_mode";
+    public static final String USER_INTERACTION_MODE = "interaction_mode";
+    public static final String USER_USER_TYPE = "user_type";
+    public static final String USER_SPEECH_SPEED = "speech_speed";
+    public static final String USER_SPEECH_PITCH = "speech_pitch";
+    public static final String USER_GESTURE_MODE = "gesture_mode";
+    public static final String USER_USE_APP_VOICE = "use_voice";
+    public static final String USER_LAST_LOGGED = "last_logged";
 
 
     //Thresholds
@@ -112,7 +113,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
         String CREATE_USER_TABLE = "CREATE TABLE " + TABLE_USER_OPTIONS + "("
                 + USER_ID + " TEXT PRIMARY KEY," + USER_READING_MODE + " TEXT,"+ USER_FOCUS_MODE + " TEXT," + USER_INTERACTION_MODE + " TEXT," + USER_USER_TYPE + " TEXT," + USER_GESTURE_MODE + " TEXT,"
-                + USER_SPEECH_SPEED + " TEXT, " + USER_SPEECH_PITCH + " TEXT, " + USER_USE_APP_VOICE + " TEXT )";
+                + USER_SPEECH_SPEED + " TEXT, " + USER_SPEECH_PITCH + " TEXT, " + USER_USE_APP_VOICE + " TEXT, " + USER_LAST_LOGGED + " TEXT )";
         db.execSQL(CREATE_USER_TABLE);
     }
 
@@ -151,6 +152,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         values.put(USER_SPEECH_SPEED, "1.0");
         values.put(USER_SPEECH_PITCH, "1.0");
         values.put(USER_USE_APP_VOICE, "true");
+        values.put(USER_LAST_LOGGED, "true");
 
         // Inserting Row
         db.insert(TABLE_USER_OPTIONS, null, values);
@@ -192,6 +194,23 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         System.err.println( "Updating User: " + currentUserID + " use voice: " + use_voice + " result " + result);
         db.close(); // Closing database connection
 
+    }
+
+    public User getUserLastlogged(){
+        String selectQuery = "SELECT  * FROM " + TABLE_USER_OPTIONS + " WHERE " + USER_LAST_LOGGED + " = 'true'";
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        User user = null;
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+
+            user = new User(cursor.getString(0), cursor.getString(1), cursor.getString(2),cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6),cursor.getString(7), cursor.getString(8));
+            System.err.println( "Getting User: " + currentUserID + " use voice: " + cursor.getString(8) + " getting boolean " + Boolean.valueOf(cursor.getString(8)));
+        }
+
+        // return contact list
+        return user;
     }
 
     public User getUserOptions(){
@@ -412,9 +431,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     }
 
     public void storeAllActionsOnCSV(String dir){
-        System.err.println( "Saving all actions' information in a file");
         System.err.println( "Saving to: " + dir);
-        System.err.println( "---------------------------------------------------------------------------");
 
         try {
             File root = new File(dir);
@@ -444,8 +461,6 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
             System.err.println( "Status: Failed to save actions. Report: ");
             System.err.println( io.getMessage());
         }
-
-        System.err.println( "---------------------------------------------------------------------------");
 
     }
 

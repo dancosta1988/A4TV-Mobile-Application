@@ -219,7 +219,8 @@ public class Settings extends AppCompatPreferenceActivity {
             if (id == android.R.id.home) {
                 Intent backToHomeActivityIntent = new Intent(getActivity(), Settings.class);
                 backToHomeActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(backToHomeActivityIntent);
+                getActivity().setResult(1,backToHomeActivityIntent);
+                getActivity().finish();
                 return true;
             }
             return super.onOptionsItemSelected(item);
@@ -251,7 +252,8 @@ public class Settings extends AppCompatPreferenceActivity {
             if (id == android.R.id.home) {
                 Intent backToHomeActivityIntent = new Intent(getActivity(), Settings.class);
                 backToHomeActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(backToHomeActivityIntent);
+                getActivity().setResult(1,backToHomeActivityIntent);
+                getActivity().finish();
                 return true;
             }
             return super.onOptionsItemSelected(item);
@@ -284,7 +286,8 @@ public class Settings extends AppCompatPreferenceActivity {
             if (id == android.R.id.home) {
                 Intent backToHomeActivityIntent = new Intent(getActivity(), Settings.class);
                 backToHomeActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(backToHomeActivityIntent);
+                getActivity().setResult(1,backToHomeActivityIntent);
+                getActivity().finish();
                 return true;
             }
             return super.onOptionsItemSelected(item);
@@ -317,7 +320,8 @@ public class Settings extends AppCompatPreferenceActivity {
             if (id == android.R.id.home) {
                 Intent backToHomeActivityIntent = new Intent(getActivity(), Settings.class);
                 backToHomeActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(backToHomeActivityIntent);
+                getActivity().setResult(1,backToHomeActivityIntent);
+                getActivity().finish();
                 return true;
             }
             return super.onOptionsItemSelected(item);
@@ -350,7 +354,8 @@ public class Settings extends AppCompatPreferenceActivity {
             if (id == android.R.id.home) {
                 Intent backToHomeActivityIntent = new Intent(getActivity(), Settings.class);
                 backToHomeActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(backToHomeActivityIntent);
+                getActivity().setResult(1,backToHomeActivityIntent);
+                getActivity().finish();
                 return true;
             }
             return super.onOptionsItemSelected(item);

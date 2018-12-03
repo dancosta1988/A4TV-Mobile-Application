@@ -250,258 +250,307 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_a4_tvmain);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        RelativeLayout layout = (RelativeLayout) findViewById(R.id.content);
-        contentText = (TextView)findViewById(R.id.contentText);
+        if(savedInstanceState == null) {
 
-        //Remote Control Buttons
-        btnUP = (Button)findViewById(R.id.btnUP);
-        btnUP.setOnClickListener(this);
-        btnUP.setOnTouchListener(this);
-        btnDOWN = (Button)findViewById(R.id.btnDOWN);
-        btnDOWN.setOnClickListener(this);
-        btnDOWN.setOnTouchListener(this);
-        btnLEFT = (Button)findViewById(R.id.btnLEFT);
-        btnLEFT.setOnClickListener(this);
-        btnLEFT.setOnTouchListener(this);
-        btnRIGHT = (Button)findViewById(R.id.btnRIGHT);
-        btnRIGHT.setOnClickListener(this);
-        btnRIGHT.setOnTouchListener(this);
-        btnOK = (Button)findViewById(R.id.btnOK);
-        btnOK.setOnClickListener(this);
-        btnOK.setOnTouchListener(this);
-        btnReadScreen = (Button)findViewById(R.id.btnReadScreen);
-        btnReadScreen.setOnClickListener(this);
-        btnReadScreen.setOnTouchListener(this);
-        btnREPEAT = (Button)findViewById(R.id.btnREPEAT);
-        btnREPEAT.setOnClickListener(this);
-        btnREPEAT.setOnTouchListener(this);
-        btnINTER = (Button)findViewById(R.id.btnSpeech);
-        btnINTER.setOnClickListener(this);
-        btnINTER.setOnTouchListener(this);
+            System.err.println("Creating the Activity...");
 
-        hideButtons();
+            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
+            RelativeLayout layout = (RelativeLayout) findViewById(R.id.content);
+            contentText = (TextView) findViewById(R.id.contentText);
 
-        //Connection button
-        btnConnect = (ToggleButton)findViewById(R.id.btnConnect);
-        btnConnect.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    userInterfaceEventManager.addAction("connected to tv", "-", "-" , "-" ,"button", readingMode+"."+focusMode, interactMode+"");
-                    // The toggle is enabled
-                    connect();
-                } else {
-                    // The toggle is disabled
-                    userInterfaceEventManager.addAction("disconnected from tv","-", "-" , "-" , "button", readingMode+"."+focusMode, interactMode+"");
-                    disconnect();
+            //Remote Control Buttons
+            btnUP = (Button) findViewById(R.id.btnUP);
+            btnUP.setOnClickListener(this);
+            btnUP.setOnTouchListener(this);
+            btnDOWN = (Button) findViewById(R.id.btnDOWN);
+            btnDOWN.setOnClickListener(this);
+            btnDOWN.setOnTouchListener(this);
+            btnLEFT = (Button) findViewById(R.id.btnLEFT);
+            btnLEFT.setOnClickListener(this);
+            btnLEFT.setOnTouchListener(this);
+            btnRIGHT = (Button) findViewById(R.id.btnRIGHT);
+            btnRIGHT.setOnClickListener(this);
+            btnRIGHT.setOnTouchListener(this);
+            btnOK = (Button) findViewById(R.id.btnOK);
+            btnOK.setOnClickListener(this);
+            btnOK.setOnTouchListener(this);
+            btnReadScreen = (Button) findViewById(R.id.btnReadScreen);
+            btnReadScreen.setOnClickListener(this);
+            btnReadScreen.setOnTouchListener(this);
+            btnREPEAT = (Button) findViewById(R.id.btnREPEAT);
+            btnREPEAT.setOnClickListener(this);
+            btnREPEAT.setOnTouchListener(this);
+            btnINTER = (Button) findViewById(R.id.btnSpeech);
+            btnINTER.setOnClickListener(this);
+            btnINTER.setOnTouchListener(this);
+
+            hideButtons();
+
+            //Connection button
+            btnConnect = (ToggleButton) findViewById(R.id.btnConnect);
+            btnConnect.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        userInterfaceEventManager.addAction("connected to tv", "-", "-", "-", "button", readingMode + "." + focusMode, interactMode + "");
+                        // The toggle is enabled
+                        connect();
+                    } else {
+                        // The toggle is disabled
+                        userInterfaceEventManager.addAction("disconnected from tv", "-", "-", "-", "button", readingMode + "." + focusMode, interactMode + "");
+                        disconnect();
+                    }
                 }
-            }
-        });
-        btnConnect.setOnTouchListener(this);
-        //Speech recognizer
-        int permissionCheck = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.RECORD_AUDIO);
+            });
+            btnConnect.setOnTouchListener(this);
+            //Speech recognizer
+            int permissionCheck = ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.RECORD_AUDIO);
 
-        if(permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
 
-            sr = SpeechRecognizer.createSpeechRecognizer(this);
-            SpeechRecognitionListener srListener = new SpeechRecognitionListener();
-            sr.setRecognitionListener(srListener);
+                sr = SpeechRecognizer.createSpeechRecognizer(this);
+                SpeechRecognitionListener srListener = new SpeechRecognitionListener();
+                sr.setRecognitionListener(srListener);
 
-            recognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-            recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-            recognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,"voice.recognition.test");
-            recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "pt-BR");
+                recognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                recognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, "voice.recognition.test");
+                recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "pt-BR");
 
-            recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS,5);
-
+                recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
 
 
-        }else{
+            } else {
 
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.RECORD_AUDIO},
-                    MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
-
-        }
-
-        myVib = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
-
-        //myo stuff
-        Hub hub = Hub.getInstance();
-        if(!hub.init(this, getPackageName())) {
-            //sdasdsd
-        }else {
-            // Disable standard Myo locking policy. All poses will be delivered.
-            hub.setLockingPolicy(Hub.LockingPolicy.NONE);
-
-            // Next, register for DeviceListener callbacks.
-            hub.addListener(mListener);
-
-            // Finally, scan for Myo devices and connect to the first one found that is very near.
-            hub.attachToAdjacentMyo();
-        }
-
-        //touch screen gestures
-        // Create an object of our Custom Gesture Detector Class
-        A4TVGestureListener customGestureDetector = new A4TVGestureListener(){
-            public void onSwipeRight() {
-                System.err.println("Swipe Right");
-                userInterfaceEventManager.addAction(Action.RIGHT,"-", "-" , "-" , "screen_gesture", readingMode+"."+focusMode, interactMode+"");
-                sendKeyboardInstruction(A4TVMobileClient.KEY_RIGHT);
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.RECORD_AUDIO},
+                        MY_PERMISSIONS_REQUEST_RECORD_AUDIO);
 
             }
 
-            public void onSwipeLeft() {
-                System.err.println("Swipe Left");
-                userInterfaceEventManager.addAction(Action.LEFT, "-", "-" , "-" ,"screen_gesture", readingMode+"."+focusMode, interactMode+"");
-                sendKeyboardInstruction(A4TVMobileClient.KEY_LEFT);
+            myVib = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
+
+            //myo stuff
+            Hub hub = Hub.getInstance();
+            if (!hub.init(this, getPackageName())) {
+                //sdasdsd
+            } else {
+                // Disable standard Myo locking policy. All poses will be delivered.
+                hub.setLockingPolicy(Hub.LockingPolicy.NONE);
+
+                // Next, register for DeviceListener callbacks.
+                hub.addListener(mListener);
+
+                // Finally, scan for Myo devices and connect to the first one found that is very near.
+                hub.attachToAdjacentMyo();
             }
 
-            public void onSwipeTop() {
-                System.err.println("Swipe Up");
-                userInterfaceEventManager.addAction(Action.UP,"-", "-" , "-" , "screen_gesture", readingMode+"."+focusMode, interactMode+"");
-                sendKeyboardInstruction(A4TVMobileClient.KEY_UP);
+            //touch screen gestures
+            // Create an object of our Custom Gesture Detector Class
+            A4TVGestureListener customGestureDetector = new A4TVGestureListener() {
+                public void onSwipeRight() {
+                    System.err.println("Swipe Right");
+                    userInterfaceEventManager.addAction(Action.RIGHT, "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
+                    sendKeyboardInstruction(A4TVMobileClient.KEY_RIGHT);
 
-            }
-
-            public void onSwipeBottom() {
-                System.err.println("Swipe Down");
-                userInterfaceEventManager.addAction(Action.DOWN,"-", "-" , "-" , "screen_gesture", readingMode+"."+focusMode, interactMode+"");
-                sendKeyboardInstruction(A4TVMobileClient.KEY_DOWN);
-            }
-
-            public  void onDoubletap(){
-                System.err.println("Confirmation");
-                userInterfaceEventManager.addAction(Action.OK, "-", "-" , "-" ,"screen_gesture", readingMode+"."+focusMode, interactMode+"");
-                sendKeyboardInstruction(A4TVMobileClient.KEY_OK);
-            }
-
-            public void holdingDown(){
-                System.err.println("Holding down");
-                if(recognizerIntent != null) {
-                    userInterfaceEventManager.addAction("start speech", "-", "-" , "-" ,"screen_gesture", readingMode+"."+focusMode, interactMode+"");
-                    sr.startListening(recognizerIntent);
                 }
-            }
 
-            public void onSingleTap(){
-                System.err.println("SingleTap");
-                if(recognizerIntent != null) {
-                    userInterfaceEventManager.addAction(Action.LOCALIZE, "-", "-" , "-" ,"screen_gesture", readingMode+"."+focusMode, interactMode+"");
-                    localize();
+                public void onSwipeLeft() {
+                    System.err.println("Swipe Left");
+                    userInterfaceEventManager.addAction(Action.LEFT, "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
+                    sendKeyboardInstruction(A4TVMobileClient.KEY_LEFT);
                 }
-            }
 
-            public void onScrollDown(){
-                System.err.println("ScrollDown");
+                public void onSwipeTop() {
+                    System.err.println("Swipe Up");
+                    userInterfaceEventManager.addAction(Action.UP, "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
+                    sendKeyboardInstruction(A4TVMobileClient.KEY_UP);
+
+                }
+
+                public void onSwipeBottom() {
+                    System.err.println("Swipe Down");
+                    userInterfaceEventManager.addAction(Action.DOWN, "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
+                    sendKeyboardInstruction(A4TVMobileClient.KEY_DOWN);
+                }
+
+                public void onDoubletap() {
+                    System.err.println("Confirmation");
+                    userInterfaceEventManager.addAction(Action.OK, "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
+                    sendKeyboardInstruction(A4TVMobileClient.KEY_OK);
+                }
+
+                public void holdingDown() {
+                    System.err.println("Holding down");
+                    if (recognizerIntent != null) {
+                        userInterfaceEventManager.addAction("start speech", "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
+                        sr.startListening(recognizerIntent);
+                    }
+                }
+
+                public void onSingleTap() {
+                    System.err.println("SingleTap");
+                    if (recognizerIntent != null) {
+                        userInterfaceEventManager.addAction(Action.LOCALIZE, "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
+                        localize();
+                    }
+                }
+
+                public void onScrollDown() {
+                    System.err.println("ScrollDown");
                 /*
                 if(recognizerIntent != null) {
                     userInterfaceEventManager.addAction(Action.READ_SCREEN, "-", "-" , "-" ,"screen_gesture", readingMode+"."+focusMode, interactMode+"");
                     readScreen();
                 }*/
-            }
-        };
-        // Create a GestureDetector
-        mGestureDetector = new GestureDetector(this, customGestureDetector);
-        // Attach listeners that'll be called for double-tap and related gestures
-        mGestureDetector.setOnDoubleTapListener(customGestureDetector);
-        touch = new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, final MotionEvent event) {
-                mGestureDetector.onTouchEvent(event);
-                return true;
-            }
+                }
+            };
+            // Create a GestureDetector
+            mGestureDetector = new GestureDetector(this, customGestureDetector);
+            // Attach listeners that'll be called for double-tap and related gestures
+            mGestureDetector.setOnDoubleTapListener(customGestureDetector);
+            touch = new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, final MotionEvent event) {
+                    mGestureDetector.onTouchEvent(event);
+                    return true;
+                }
 
-        };
-        touch_view = (View)findViewById(R.id.touch_view_tests); //before touchView
-        touch_view.setOnTouchListener(touch);
-
-
-
-        ToggleButton modeBtn = (ToggleButton)findViewById(R.id.modeBtn);
-        modeBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                //NO LONGER NEEDED
-            }
-        });
+            };
+            touch_view = (View) findViewById(R.id.touch_view_tests); //before touchView
+            touch_view.setOnTouchListener(touch);
 
 
-        checkTTS();
-        //start ui event manager
-        userInterfaceEventManager = new A4TVUserInterfaceEventManager(this);
+            ToggleButton modeBtn = (ToggleButton) findViewById(R.id.modeBtn);
+            modeBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    //NO LONGER NEEDED
+                }
+            });
 
 
-        //start dialog manager
-        dialogs = new A4TVAdaptationAndTutorialDialogs(this);
+            checkTTS();
+            //start ui event manager
+            userInterfaceEventManager = new A4TVUserInterfaceEventManager(this);
 
 
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if(sharedPrefs.getBoolean("delete_storage", false)){
-            deleteStorage();
-            SharedPreferences.Editor editor = sharedPrefs.edit();
-            editor.putBoolean("delete_storage", false);
-            editor.commit();
+            //start dialog manager
+            dialogs = new A4TVAdaptationAndTutorialDialogs(this);
 
+
+            if (userInterfaceEventManager.isTimeToCheckEvents())
+                checkForAccessibilityIssues();
+
+
+            //save actions to file Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+
+            Thread probe = new Thread(new DiscoverSTBAddress(this));
+            probe.start();
+        }
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        System.err.println("onResume");
+        if (firstTime){
+            System.err.println ("it's the first time");
+            firstTime = false;
         }
 
-        String newUser = sharedPrefs.getString("user_id", "root");
-        System.err.println( "Current: " + currentUser + " new user: " + newUser);
-        userInterfaceEventManager.setCurrentUserID(newUser);
-        currentUser = newUser;
+        else{
+            System.err.println("it's not the first time");
 
-        if(userInterfaceEventManager.getUserOptions() != null){
+            SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+            if(sharedPrefs.getBoolean("delete_storage", false)){
+                deleteStorage();
+                SharedPreferences.Editor editor = sharedPrefs.edit();
+                editor.putBoolean("delete_storage", false);
+                editor.commit();
+
+            }
+
+            String newUser = sharedPrefs.getString("user_id", "root");
+            User lastUserO = userInterfaceEventManager.getUserLastlogged();
+            String lastUser = null;
+            if(lastUserO != null)
+                lastUser = lastUserO._user_id;
 
 
-            getUserPreferences();
-            storeUserPreferences();
-            //not new
-            System.err.println( "Not new user");
-            User user = userInterfaceEventManager.getUserOptions();
-            SharedPreferences.Editor editor = sharedPrefs.edit();
-            System.err.println( "User: " + currentUser + " useTTS: " + user._use_voice);
-            editor.putString("focus_preference", user._focus_mode);
-            editor.putString("reading_preference", user._reading_mode);
-            editor.putString("interact_preference", user._interaction_mode);
-            editor.putString("gesture_preference", user._gesture_mode);
-            editor.putString("user_type", user._user_type);
-            editor.putString("configure_speed", user._speech_speed);
-            editor.putString("configure_pitch", user._speech_pitch);
-            editor.putBoolean("TTS Preference Source", Boolean.valueOf(user._use_voice));
-            editor.commit();
+            if(lastUserO == null || (lastUserO != null && lastUser.compareTo(newUser) != 0)) {
+                //changed user
+                System.err.println( "changed user");
+                userInterfaceEventManager.setCurrentUserID(lastUser);
+                userInterfaceEventManager.updateUserOption(A4TVUserInterfaceEventManager.USER_LAST_LOGGED, "false");
+                userInterfaceEventManager.setCurrentUserID(newUser);
+                currentUser = newUser;
 
-            //getUserPreferences();
+                if(userInterfaceEventManager.getUserOptions() != null){
 
-        }else{
+                    //not new
+                    System.err.println( "he is on database");
+                    userInterfaceEventManager.setCurrentUserID(currentUser);
+                    User user = userInterfaceEventManager.getUserOptions();
+                    SharedPreferences.Editor editor = sharedPrefs.edit();
+                    System.err.println( "User: " + currentUser + " useTTS: " + user._use_voice);
+                    editor.putString("focus_preference", user._focus_mode);
+                    editor.putString("reading_preference", user._reading_mode);
+                    editor.putString("interact_preference", user._interaction_mode);
+                    editor.putString("gesture_preference", user._gesture_mode);
+                    editor.putString("user_type", user._user_type);
+                    editor.putString("configure_speed", user._speech_speed);
+                    editor.putString("configure_pitch", user._speech_pitch);
+                    editor.putBoolean("TTS Preference Source", Boolean.valueOf(user._use_voice));
+                    editor.commit();
+                    userInterfaceEventManager.updateUserOption(A4TVUserInterfaceEventManager.USER_LAST_LOGGED, "true");
+                    //getUserPreferences();
 
-            //new user!
-            System.err.println( "It is a new user");
-            userInterfaceEventManager.addUser(newUser);
+                }else{
 
-            if (!userInterfaceEventManager.hasUserDoneTutorial()) {
-                //run tutorial
-                dialogs.startTutorial();
-                userInterfaceEventManager.addAction("begin_tutorial", "-", "-", "-", "none", readingMode + "." + focusMode, interactMode + "");
+                    //new user!
+                    System.err.println( "It is a new user");
+
+                    userInterfaceEventManager.addUser(newUser);
+                    userInterfaceEventManager.updateUserOption(A4TVUserInterfaceEventManager.USER_LAST_LOGGED, "true");
+                    User user = userInterfaceEventManager.getUserOptions();
+                    SharedPreferences.Editor editor = sharedPrefs.edit();
+                    System.err.println( "User: " + currentUser + " useTTS: " + user._use_voice);
+                    editor.putString("focus_preference", user._focus_mode);
+                    editor.putString("reading_preference", user._reading_mode);
+                    editor.putString("interact_preference", user._interaction_mode);
+                    editor.putString("gesture_preference", user._gesture_mode);
+                    editor.putString("user_type", user._user_type);
+                    editor.putString("configure_speed", user._speech_speed);
+                    editor.putString("configure_pitch", user._speech_pitch);
+                    editor.putBoolean("TTS Preference Source", Boolean.valueOf(user._use_voice));
+                    editor.commit();
+                    getUserPreferences();
+                    storeUserPreferences();
+
+                    if (!userInterfaceEventManager.hasUserDoneTutorial()) {
+                        //run tutorial
+                        dialogs.startTutorial();
+                        userInterfaceEventManager.addAction("begin_tutorial", "-", "-", "-", "none", readingMode + "." + focusMode, interactMode + "");
+                        getUserPreferences();
+                        storeUserPreferences();
+                    }
+                }
+
+            }else{
+                //did not changed user
+                userInterfaceEventManager.setCurrentUserID(newUser);
+                userInterfaceEventManager.updateUserOption(A4TVUserInterfaceEventManager.USER_LAST_LOGGED, "true");
                 getUserPreferences();
                 storeUserPreferences();
             }
+
+
+
         }
 
-
-
-        if(userInterfaceEventManager.isTimeToCheckEvents())
-            checkForAccessibilityIssues();
-
-
-        //save actions to file Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
-
-        Thread probe = new Thread(new DiscoverSTBAddress(this));
-        probe.start();
     }
-
-
 
     private void deleteStorage(){
         System.err.println( "Deleting storage ... ");
