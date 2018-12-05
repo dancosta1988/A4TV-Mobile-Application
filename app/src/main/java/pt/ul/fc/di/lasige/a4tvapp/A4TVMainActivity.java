@@ -455,12 +455,11 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
     protected void onResume(){
         super.onResume();
         System.err.println("onResume");
-        if (firstTime){
+       /* if (firstTime){
             System.err.println ("it's the first time");
             firstTime = false;
         }
-
-        else{
+        else{*/
             System.err.println("it's not the first time");
 
             SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -548,7 +547,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
 
 
 
-        }
+        //}
 
     }
 
