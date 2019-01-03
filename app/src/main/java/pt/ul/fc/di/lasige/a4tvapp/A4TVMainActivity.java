@@ -433,7 +433,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
             checkTTS();
             //start ui event manager
             userInterfaceEventManager = new A4TVUserInterfaceEventManager(this);
-
+            userInterfaceEventManager.readConfigFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() +"/A4TV/", "a4tv_config.xml");
 
             //start dialog manager
             dialogs = new A4TVAdaptationAndTutorialDialogs(this);

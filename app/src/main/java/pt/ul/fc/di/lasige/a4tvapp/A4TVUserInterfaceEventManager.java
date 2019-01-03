@@ -5,11 +5,16 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Xml;
+
+import org.xmlpull.v1.XmlPullParser;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -64,18 +69,18 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
 
     //Thresholds
-    static final int IRRELEVANT_ACTIONS_THRESHOLD = 6;
-    static final int SHORT_IRRELEVANT_ACTIONS_THRESHOLD = 3;
-    static final int REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD = 6;
-    static final int REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD = 6;
-    static final int REOCCURENCE_SPEECH_ACTIONS_THRESHOLD = 6;
-    static final int SHORT_REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD = 3;
-    static final int SHORT_REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD = 3;
-    static final int SHORT_REOCCURENCE_SPEECH_ACTIONS_THRESHOLD = 3;
-    static final int QUICK_SCROLL_ACTIONS_THRESHOLD = 6;
-    static final int LOST_AWARENESS_ACTIONS_THRESHOLD = 6;
-    static final int LONG_CHECK_ACTIONS_THRESHOLD = 6685; //Average 191 actions per hour (7 days x 5 hours = 6685)
-    static final int SHORT_CHECK_ACTIONS_THRESHOLD = 120;
+    static  int IRRELEVANT_ACTIONS_THRESHOLD = 6;
+    static  int SHORT_IRRELEVANT_ACTIONS_THRESHOLD = 3;
+    static  int REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD = 6;
+    static  int REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD = 6;
+    static  int REOCCURENCE_SPEECH_ACTIONS_THRESHOLD = 6;
+    static  int SHORT_REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD = 3;
+    static  int SHORT_REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD = 3;
+    static  int SHORT_REOCCURENCE_SPEECH_ACTIONS_THRESHOLD = 3;
+    static  int QUICK_SCROLL_ACTIONS_THRESHOLD = 6;
+    static  int LOST_AWARENESS_ACTIONS_THRESHOLD = 6;
+    static  int LONG_CHECK_ACTIONS_THRESHOLD = 6685; //Average 191 actions per hour (7 days x 5 hours = 6685)
+    static  int SHORT_CHECK_ACTIONS_THRESHOLD = 120;
 
 
     private int NumberOfErrors = 0;
@@ -460,6 +465,69 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         }catch(IOException io){
             System.err.println( "Status: Failed to save actions. Report: ");
             System.err.println( io.getMessage());
+        }
+
+    }
+
+    public void readConfigFile(String dir, String fileName){
+
+        try {
+            //read the file containing the configuration
+            File initialFile = new File(dir + fileName);
+            InputStream targetStream = new FileInputStream(initialFile);
+
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+            parser.setInput(targetStream, null);
+            parser.nextTag();
+
+            parser.require(XmlPullParser.START_TAG, null, "config");
+            while (parser.next() != XmlPullParser.END_TAG) {
+                if (parser.getEventType() != XmlPullParser.START_TAG) {
+                    continue;
+                }
+                String name = parser.getName();
+                // Starts by looking for the property tag
+                if (name.equals("property")) {
+                    String nameP = parser.getAttributeValue(null, "name");
+                    String valueP = "";
+                    if (parser.next() == XmlPullParser.TEXT) {
+                        valueP = parser.getText();
+                        parser.nextTag();
+                    }
+                    if(valueP != ""){
+                        System.err.println( "Property: " + nameP + " = " + valueP);
+                        if(nameP.compareTo("IRRELEVANT_ACTIONS_THRESHOLD") == 0)
+                            IRRELEVANT_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                        else if(nameP.compareTo("SHORT_IRRELEVANT_ACTIONS_THRESHOLD") == 0)
+                            SHORT_IRRELEVANT_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                        else if(nameP.compareTo("REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD") == 0)
+                            REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                        else if(nameP.compareTo("REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD") == 0)
+                            REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                        else if(nameP.compareTo("REOCCURENCE_SPEECH_ACTIONS_THRESHOLD") == 0)
+                            REOCCURENCE_SPEECH_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                        else if(nameP.compareTo("SHORT_REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD") == 0)
+                            SHORT_REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                        else if(nameP.compareTo("SHORT_REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD") == 0)
+                            SHORT_REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                        else if(nameP.compareTo("SHORT_REOCCURENCE_SPEECH_ACTIONS_THRESHOLD") == 0)
+                            SHORT_REOCCURENCE_SPEECH_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                        else if(nameP.compareTo("QUICK_SCROLL_ACTIONS_THRESHOLD") == 0)
+                            QUICK_SCROLL_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                        else if(nameP.compareTo("LOST_AWARENESS_ACTIONS_THRESHOLD") == 0)
+                            LOST_AWARENESS_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                        else if(nameP.compareTo("LONG_CHECK_ACTIONS_THRESHOLD") == 0)
+                            LONG_CHECK_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                        else if(nameP.compareTo("SHORT_CHECK_ACTIONS_THRESHOLD") == 0)
+                            SHORT_CHECK_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                    }
+                }
+            }
+
+        }catch(Exception e){
+            System.err.println( "Status: Failed to read config file. Report: ");
+            System.err.println( e.getMessage());
         }
 
     }
