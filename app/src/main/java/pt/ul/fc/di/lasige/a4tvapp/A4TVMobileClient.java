@@ -45,7 +45,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
     static final int KEY_STOP = 413;
     static final int KEY_PLAY = 415;
     static final int KEY_FAST_FWD = 417;
-    static final int KEY_BACK = 461;
+    static final int KEY_BACK = 8;//461;
 
     //user type
     static final int BLIND = 1; //legaly blind
@@ -71,6 +71,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
     private BufferedReader stdIn;
     private Speaker speaker;
     private boolean connected = false;
+    private boolean closeConnectionByUser = false;
     private UIMLParser uimlParser;
     private ArrayList<String> ttsQueue;
     private ArrayList<String> lastSentence;
@@ -90,8 +91,29 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
     private ArrayList<TVApplicationState> states;
     private int currentStateIndex = 0;
 
+    String hardcodedStoreTemplate[] = {"<uiml xmlns=\"http://docs.oasis-open.org/uiml/ns/uiml4.0\">" +
+            "<peers>" +
+            "<presentation base=\" HTML_4.01frameset_Harmonia_0.1 \"/>" +
+            "</peers>" +
+            "<interface>" +
+            "<structure>" +
+            "<part class=\"application\" id=\"a4tv_app\"><part class=\"DIV\" id=\"content\"><part class=\"IMG\" id=\"app1\"/><part class=\"IMG\" id=\"app2\"/><part class=\"IMG\" id=\"app3\"/><part class=\"IMG\" id=\"app4\"/></part></part>"+
+            "</structure>" +
+            "<style>" +
+            "<property part-name=\"app1\" name=\"target_left\">app4</property>"+
+            "<property part-name=\"app1\" name=\"target_right\">app2</property>"+
+            "<property part-name=\"app2\" name=\"target_left\">app1</property>"+
+            "<property part-name=\"app2\" name=\"target_right\">app3</property>"+
+            "<property part-name=\"app3\" name=\"target_left\">app2</property>"+
+            "<property part-name=\"app3\" name=\"target_right\">app4</property>"+
+            "<property part-name=\"app4\" name=\"target_left\">app3</property>"+
+            "<property part-name=\"app4\" name=\"target_right\">app1</property>"+
+            "</style>" +
+            "</interface>" +
+            "</uiml>"
+            };
 
-    String hardcodedMapIgModa[] = {"<uiml xmlns=\"http://docs.oasis-open.org/uiml/ns/uiml4.0\">" +
+    String hardcodedMapIGTemplate[] = {"<uiml xmlns=\"http://docs.oasis-open.org/uiml/ns/uiml4.0\">" +
             "<peers>" +
             "<presentation base=\" HTML_4.01frameset_Harmonia_0.1 \"/>" +
             "</peers>" +
@@ -183,44 +205,63 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
             "<property part-name=\"a4tv_LI_16\" name=\"target_left\">a4tv_LI_14</property>" +
             "<property part-name=\"active_item\" name=\"target_up\">a4tv_LI_12</property>" +
             "<property part-name=\"a4tv_ARTICLE_22\" name=\"type\">ARTICLE</property>" +
-            "<property part-name=\"a4tv_ARTICLE_22\" name=\"target_down\">a4tv_ARTICLE_26</property>" +
+            "<property part-name=\"a4tv_ARTICLE_22\" name=\"target_down\">a4tv_ARTICLE_25</property>" +
             "<property part-name=\"a4tv_ARTICLE_22\" name=\"target_right\">active_item</property>" +
-            "<property part-name=\"a4tv_ARTICLE_26\" name=\"type\">ARTICLE</property>" +
-            "<property part-name=\"a4tv_ARTICLE_26\" name=\"target_up\">a4tv_ARTICLE_22</property>" +
-            "<property part-name=\"a4tv_ARTICLE_26\" name=\"target_down\">a4tv_ARTICLE_30</property>" +
-            "<property part-name=\"a4tv_ARTICLE_26\" name=\"target_right\">active_item</property>" +
-            "<property part-name=\"a4tv_ARTICLE_30\" name=\"type\">ARTICLE</property>" +
-            "<property part-name=\"a4tv_ARTICLE_30\" name=\"target_up\">a4tv_ARTICLE_26</property>" +
-            "<property part-name=\"a4tv_ARTICLE_30\" name=\"target_down\">a4tv_ARTICLE_34</property>" +
-            "<property part-name=\"a4tv_ARTICLE_30\" name=\"target_right\">active_item</property>" +
+            "<property part-name=\"a4tv_ARTICLE_25\" name=\"type\">ARTICLE</property>" +
+            "<property part-name=\"a4tv_ARTICLE_25\" name=\"target_up\">a4tv_ARTICLE_22</property>" +
+            "<property part-name=\"a4tv_ARTICLE_25\" name=\"target_down\">a4tv_ARTICLE_28</property>" +
+            "<property part-name=\"a4tv_ARTICLE_25\" name=\"target_right\">active_item</property>" +
+            "<property part-name=\"a4tv_ARTICLE_28\" name=\"type\">ARTICLE</property>" +
+            "<property part-name=\"a4tv_ARTICLE_28\" name=\"target_up\">a4tv_ARTICLE_25</property>" +
+            "<property part-name=\"a4tv_ARTICLE_28\" name=\"target_down\">a4tv_ARTICLE_31</property>" +
+            "<property part-name=\"a4tv_ARTICLE_28\" name=\"target_right\">active_item</property>" +
+            "<property part-name=\"a4tv_ARTICLE_31\" name=\"type\">ARTICLE</property>" +
+            "<property part-name=\"a4tv_ARTICLE_31\" name=\"target_up\">a4tv_ARTICLE_28</property>" +
+            "<property part-name=\"a4tv_ARTICLE_31\" name=\"target_down\">a4tv_ARTICLE_34</property>" +
+            "<property part-name=\"a4tv_ARTICLE_31\" name=\"target_right\">active_item</property>" +
             "<property part-name=\"a4tv_ARTICLE_34\" name=\"type\">ARTICLE</property>" +
-            "<property part-name=\"a4tv_ARTICLE_34\" name=\"target_up\">a4tv_ARTICLE_30</property>" +
-            "<property part-name=\"a4tv_ARTICLE_34\" name=\"target_down\">a4tv_ARTICLE_38</property>" +
+            "<property part-name=\"a4tv_ARTICLE_34\" name=\"target_up\">a4tv_ARTICLE_31</property>" +
+            "<property part-name=\"a4tv_ARTICLE_34\" name=\"target_down\">a4tv_ARTICLE_37</property>" +
             "<property part-name=\"a4tv_ARTICLE_34\" name=\"target_right\">active_item</property>" +
-            "<property part-name=\"a4tv_ARTICLE_38\" name=\"type\">ARTICLE</property>" +
-            "<property part-name=\"a4tv_ARTICLE_38\" name=\"target_up\">a4tv_ARTICLE_34</property>" +
-            "<property part-name=\"a4tv_ARTICLE_38\" name=\"target_down\">a4tv_ARTICLE_42</property>" +
-            "<property part-name=\"a4tv_ARTICLE_38\" name=\"target_right\">active_item</property>" +
-            "<property part-name=\"a4tv_ARTICLE_42\" name=\"type\">ARTICLE</property>" +
-            "<property part-name=\"a4tv_ARTICLE_42\" name=\"target_up\">a4tv_ARTICLE_38</property>" +
-            "<property part-name=\"a4tv_ARTICLE_42\" name=\"target_down\">a4tv_ARTICLE_46</property>" +
-            "<property part-name=\"a4tv_ARTICLE_42\" name=\"target_right\">active_item</property>" +
+            "<property part-name=\"a4tv_ARTICLE_37\" name=\"type\">ARTICLE</property>" +
+            "<property part-name=\"a4tv_ARTICLE_37\" name=\"target_up\">a4tv_ARTICLE_34</property>" +
+            "<property part-name=\"a4tv_ARTICLE_37\" name=\"target_down\">a4tv_ARTICLE_40</property>" +
+            "<property part-name=\"a4tv_ARTICLE_37\" name=\"target_right\">active_item</property>" +
+            "<property part-name=\"a4tv_ARTICLE_40\" name=\"type\">ARTICLE</property>" +
+            "<property part-name=\"a4tv_ARTICLE_40\" name=\"target_up\">a4tv_ARTICLE_37</property>" +
+            "<property part-name=\"a4tv_ARTICLE_40\" name=\"target_down\">a4tv_ARTICLE_46</property>" +
+            "<property part-name=\"a4tv_ARTICLE_40\" name=\"target_right\">active_item</property>" +
             "<property part-name=\"a4tv_ARTICLE_46\" name=\"type\">ARTICLE</property>" +
-            "<property part-name=\"a4tv_ARTICLE_46\" name=\"target_up\">a4tv_ARTICLE_42</property>" +
-            "<property part-name=\"a4tv_ARTICLE_46\" name=\"target_down\">a4tv_ARTICLE_48</property>" +
+            "<property part-name=\"a4tv_ARTICLE_46\" name=\"target_up\">a4tv_ARTICLE_40</property>" +
+            "<property part-name=\"a4tv_ARTICLE_46\" name=\"target_down\">a4tv_ARTICLE_49</property>" +
             "<property part-name=\"a4tv_ARTICLE_46\" name=\"target_right\">active_item</property>" +
-            "<property part-name=\"a4tv_ARTICLE_50\" name=\"type\">ARTICLE</property>" +
-            "<property part-name=\"a4tv_ARTICLE_50\" name=\"target_up\">a4tv_ARTICLE_48</property>" +
-            "<property part-name=\"a4tv_ARTICLE_50\" name=\"target_down\">a4tv_ARTICLE_54</property>" +
-            "<property part-name=\"a4tv_ARTICLE_50\" name=\"target_right\">active_item</property>" +
-            "<property part-name=\"a4tv_ARTICLE_54\" name=\"type\">ARTICLE</property>" +
-            "<property part-name=\"a4tv_ARTICLE_54\" name=\"target_up\">a4tv_ARTICLE_50</property>" +
-            "<property part-name=\"a4tv_ARTICLE_54\" name=\"target_down\">a4tv_ARTICLE_58</property>" +
-            "<property part-name=\"a4tv_ARTICLE_54\" name=\"target_right\">active_item</property>" +
+            "<property part-name=\"a4tv_ARTICLE_49\" name=\"type\">ARTICLE</property>" +
+            "<property part-name=\"a4tv_ARTICLE_49\" name=\"target_up\">a4tv_ARTICLE_46</property>" +
+            "<property part-name=\"a4tv_ARTICLE_49\" name=\"target_down\">a4tv_ARTICLE_52</property>" +
+            "<property part-name=\"a4tv_ARTICLE_49\" name=\"target_right\">active_item</property>" +
+            "<property part-name=\"a4tv_ARTICLE_52\" name=\"type\">ARTICLE</property>" +
+            "<property part-name=\"a4tv_ARTICLE_52\" name=\"target_up\">a4tv_ARTICLE_49</property>" +
+            "<property part-name=\"a4tv_ARTICLE_52\" name=\"target_down\">a4tv_ARTICLE_55</property>" +
+            "<property part-name=\"a4tv_ARTICLE_52\" name=\"target_right\">active_item</property>" +
+            "<property part-name=\"a4tv_ARTICLE_55\" name=\"type\">ARTICLE</property>" +
+            "<property part-name=\"a4tv_ARTICLE_55\" name=\"target_up\">a4tv_ARTICLE_52</property>" +
+            "<property part-name=\"a4tv_ARTICLE_55\" name=\"target_down\">a4tv_ARTICLE_58</property>" +
+            "<property part-name=\"a4tv_ARTICLE_55\" name=\"target_right\">active_item</property>" +
+            "<property part-name=\"a4tv_ARTICLE_58\" name=\"type\">ARTICLE</property>" +
+            "<property part-name=\"a4tv_ARTICLE_58\" name=\"target_up\">a4tv_ARTICLE_55</property>" +
+            "<property part-name=\"a4tv_ARTICLE_58\" name=\"target_down\">a4tv_ARTICLE_61</property>" +
+            "<property part-name=\"a4tv_ARTICLE_58\" name=\"target_right\">active_item</property>" +
+            "<property part-name=\"a4tv_ARTICLE_61\" name=\"type\">ARTICLE</property>" +
+            "<property part-name=\"a4tv_ARTICLE_61\" name=\"target_up\">a4tv_ARTICLE_58</property>" +
+            "<property part-name=\"a4tv_ARTICLE_61\" name=\"target_down\">a4tv_ARTICLE_66</property>" +
+            "<property part-name=\"a4tv_ARTICLE_61\" name=\"target_right\">active_item</property>" +
+            "<property part-name=\"a4tv_ARTICLE_64\" name=\"type\">ARTICLE</property>" +
+            "<property part-name=\"a4tv_ARTICLE_66\" name=\"target_up\">a4tv_ARTICLE_62</property>" +
+            "<property part-name=\"a4tv_ARTICLE_64\" name=\"target_right\">active_item</property>" +
             "</style>" +
             "</interface>" +
             "</uiml>"};
-    String hardcodedMapCocorico[] = {"<uiml xmlns=\"http://docs.oasis-open.org/uiml/ns/uiml4.0\">" +
+    String hardcodedMapVideoTemplate[] = {"<uiml xmlns=\"http://docs.oasis-open.org/uiml/ns/uiml4.0\">" +
             " <peers>" +
             "<presentation base=\" HTML_4.01frameset_Harmonia_0.1 \"/>" +
             " </peers>" +
@@ -294,12 +335,14 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
             " <property part-name=\"a4tv_DIV_11\" name=\"target_up\">a4tv_DIV_10</property>" +
             " <property part-name=\"a4tv_DIV_11\" name=\"target_down\">a4tv_DIV_8</property>" +
             " <property part-name=\"a4tv_DIV_18\" name=\"target_right\">a4tv_DIV_24</property>" +
+            " <property part-name=\"a4tv_DIV_20\" name=\"target_right\">a4tv_DIV_24</property>" +
+            " <property part-name=\"a4tv_DIV_20\" name=\"target_left\">a4tv_DIV_14</property>" +
             " <property part-name=\"a4tv_DIV_22\" name=\"target_right\">a4tv_DIV_30</property>" +
             " <property part-name=\"a4tv_DIV_24\" name=\"target_right\">a4tv_DIV_30</property>" +
-            " <property part-name=\"a4tv_DIV_24\" name=\"target_left\">a4tv_DIV_18</property>" +
+            " <property part-name=\"a4tv_DIV_24\" name=\"target_left\">a4tv_DIV_20</property>" +
             " <property part-name=\"a4tv_DIV_28\" name=\"target_right\">a4tv_DIV_36</property>" +
             " <property part-name=\"a4tv_DIV_30\" name=\"target_right\">a4tv_DIV_36</property>" +
-            " <property part-name=\"a4tv_DIV_30\" name=\"target_left\">a4tv_DIV_24</property>" +
+            " <property part-name=\"a4tv_DIV_30\" name=\"target_left\">a4tv_DIV_26</property>" +
             " <property part-name=\"a4tv_DIV_34\" name=\"target_right\">a4tv_DIV_40</property>" +
             " <property part-name=\"a4tv_DIV_36\" name=\"target_right\">a4tv_DIV_40</property>" +
             " <property part-name=\"a4tv_DIV_36\" name=\"target_left\">a4tv_DIV_30</property>" +
@@ -317,26 +360,38 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
             " <property part-name=\"a4tv_DIV_60\" name=\"target_left\">a4tv_DIV_54</property>" +
             " <property part-name=\"a4tv_DIV_64\" name=\"target_right\">a4tv_DIV_70</property>" +
             " <property part-name=\"a4tv_DIV_66\" name=\"target_right\">a4tv_DIV_70</property>" +
+            " <property part-name=\"a4tv_DIV_66\" name=\"target_left\">a4tv_DIV_60</property>" +
             " <property part-name=\"a4tv_DIV_70\" name=\"target_right\">a4tv_DIV_76</property>" +
             " <property part-name=\"a4tv_DIV_72\" name=\"target_right\">a4tv_DIV_76</property>" +
+            " <property part-name=\"a4tv_DIV_72\" name=\"target_left\">a4tv_DIV_66</property>" +
             " <property part-name=\"a4tv_DIV_76\" name=\"target_right\">a4tv_DIV_82</property>" +
             " <property part-name=\"a4tv_DIV_78\" name=\"target_right\">a4tv_DIV_82</property>" +
+            " <property part-name=\"a4tv_DIV_78\" name=\"target_left\">a4tv_DIV_72</property>" +
             " <property part-name=\"a4tv_DIV_82\" name=\"target_right\">a4tv_DIV_88</property>" +
             " <property part-name=\"a4tv_DIV_84\" name=\"target_right\">a4tv_DIV_88</property>" +
+            " <property part-name=\"a4tv_DIV_84\" name=\"target_left\">a4tv_DIV_78</property>" +
             " <property part-name=\"a4tv_DIV_88\" name=\"target_right\">a4tv_DIV_94</property>" +
             " <property part-name=\"a4tv_DIV_90\" name=\"target_right\">a4tv_DIV_94</property>" +
+            " <property part-name=\"a4tv_DIV_90\" name=\"target_left\">a4tv_DIV_84</property>" +
             " <property part-name=\"a4tv_DIV_94\" name=\"target_right\">a4tv_DIV_100</property>" +
             " <property part-name=\"a4tv_DIV_96\" name=\"target_right\">a4tv_DIV_100</property>" +
+            " <property part-name=\"a4tv_DIV_96\" name=\"target_left\">a4tv_DIV_90</property>" +
             " <property part-name=\"a4tv_DIV_100\" name=\"target_right\">a4tv_DIV_106</property>" +
             " <property part-name=\"a4tv_DIV_102\" name=\"target_right\">a4tv_DIV_106</property>" +
-            " <property part-name=\"a4tv_DIV_106\" name=\"target_right\">a4tv_DIV_112</property>" +
-            " <property part-name=\"a4tv_DIV_108\" name=\"target_right\">a4tv_DIV_112</property>" +
-            " <property part-name=\"a4tv_DIV_112\" name=\"target_right\">a4tv_DIV_118</property>" +
-            " <property part-name=\"a4tv_DIV_114\" name=\"target_right\">a4tv_DIV_118</property>" +
-            " <property part-name=\"a4tv_DIV_118\" name=\"target_right\">a4tv_DIV_124</property>" +
-            " <property part-name=\"a4tv_DIV_120\" name=\"target_right\">a4tv_DIV_124</property>" +
-            " <property part-name=\"a4tv_DIV_124\" name=\"target_right\">a4tv_DIV_128</property> " +
-            " <property part-name=\"a4tv_DIV_126\" name=\"target_right\">a4tv_DIV_128</property> " +
+            " <property part-name=\"a4tv_DIV_102\" name=\"target_left\">a4tv_DIV_96</property>" +
+            " <property part-name=\"a4tv_DIV_106\" name=\"target_right\">a4tv_DIV_112</property> " +
+            " <property part-name=\"a4tv_DIV_108\" name=\"target_right\">a4tv_DIV_112</property> " +
+            " <property part-name=\"a4tv_DIV_108\" name=\"target_left\">a4tv_DIV_102</property> " +
+            " <property part-name=\"a4tv_DIV_112\" name=\"target_right\">a4tv_DIV_118</property> " +
+            " <property part-name=\"a4tv_DIV_114\" name=\"target_right\">a4tv_DIV_118</property> " +
+            " <property part-name=\"a4tv_DIV_114\" name=\"target_left\">a4tv_DIV_108</property> " +
+            " <property part-name=\"a4tv_DIV_118\" name=\"target_right\">a4tv_DIV_124</property> " +
+            " <property part-name=\"a4tv_DIV_120\" name=\"target_right\">a4tv_DIV_124</property> " +
+            " <property part-name=\"a4tv_DIV_120\" name=\"target_left\">a4tv_DIV_114</property> " +
+            " <property part-name=\"a4tv_DIV_124\" name=\"target_right\">a4tv_DIV_130</property> " +
+            " <property part-name=\"a4tv_DIV_126\" name=\"target_right\">a4tv_DIV_130</property> " +
+            " <property part-name=\"a4tv_DIV_126\" name=\"target_left\">a4tv_DIV_120</property> " +
+            " <property part-name=\"a4tv_DIV_132\" name=\"target_left\">a4tv_DIV_126</property> " +
             " <property part-name=\"full-screen-button-back\" name=\"target_right\">full-screen-button-pause</property> " +
             " <property part-name=\"full-screen-button-back\" name=\"target_left\">full-screen-button-next</property> " +
             " <property part-name=\"full-screen-button-back\" name=\"target_up\">full-screen-progress-indicator</property> " +
@@ -364,85 +419,120 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
             " </style>" +
             "</interface>" +
             "</uiml>",
-            "<uiml xmlns=\"http://docs.oasis-open.org/uiml/ns/uiml4.0\">"  +
-            "<peers>" +
-            "<presentation base=\" HTML_4.01frameset_Harmonia_0.1 \"/>"  +
-            " </peers>"  +
-            "<interface>"  +
-            "<structure>"  +
-            " <part class=\"application\" id=\"a4tv_app\">"  +
-            " <part class=\"DIV\" id=\"main\">"  +
-            " <part class=\"DIV\" id=\"select-view\">"  +
-            " <part class=\"DIV\" id=\"a4tv_DIV_2\"/>"  +
-            " <part class=\"DIV\" id=\"left-panel\">"  +
-            " <part class=\"DIV\" id=\"logo\"/>"  +
-            " <part class=\"DIV\" id=\"category-list-scroller\">"  +
-            " <part class=\"DIV\" id=\"category-list\">"  +
-            " <part class=\"DIV\" id=\"a4tv_DIV_7\"/>"  +
-            " <part class=\"DIV\" id=\"a4tv_DIV_8\"/>"  +
-            " <part class=\"DIV\" id=\"a4tv_DIV_9\"/>"  +
-            " <part class=\"DIV\" id=\"a4tv_DIV_10\"/>"  +
-            " </part>"  +
-            "</part>"  +
-            "</part>"  +
-            " <part class=\"DIV\" id=\"a4tv_DIV_11\"/>"  +
-            " <part class=\"DIV\" id=\"info-panel\">"  +
-            " <part class=\"DIV\" id=\"info-panel-title\"/>"  +
-            " <part class=\"DIV\" id=\"info-panel-desc\"/>"  +
-            " </part>"  +
-            "<part class=\"DIV\" id=\"channel-panel\">"  +
-            " <part class=\"DIV\" id=\"a4tv_DIV_16\">"  +
-            " <part class=\"DIV\" id=\"a4tv_DIV_17\">"  +
-            " <part class=\"DIV\" id=\"a4tv_DIV_18\"/>"  +
-            " <part class=\"DIV\" id=\"a4tv_DIV_20\"/>"  +
-            " <part class=\"DIV\" id=\"a4tv_DIV_21\"/>"  +
-            " <part class=\"IMG\" id=\"a4tv_IMG_76\"/>"  +
-            " </part>"  +
-            "<part class=\"DIV\" id=\"a4tv_DIV_22\">"  +
-            " <part class=\"DIV\" id=\"a4tv_DIV_23\"/>"  +
-            " <part class=\"DIV\" id=\"a4tv_DIV_25\"/>"  +
-            " <part class=\"DIV\" id=\"a4tv_DIV_26\"/>"  +
-            " <part class=\"IMG\" id=\"a4tv_IMG_77\"/>"  +
-            " </part>"  +
-            "<part class=\"DIV\" id=\"a4tv_DIV_27\">"  +
-            " <part class=\"DIV\" id=\"a4tv_DIV_28\"/>"  +
-            " <part class=\"DIV\" id=\"a4tv_DIV_30\"/>"  +
-            " <part class=\"DIV\" id=\"a4tv_DIV_31\"/>"  +
-            " <part class=\"IMG\" id=\"a4tv_IMG_78\"/>"  +
-            " </part>"  +
-            "<part class=\"DIV\" id=\"a4tv_DIV_32\">"  +
-            " <part class=\"DIV\" id=\"a4tv_DIV_33\"/>"  +
-            " <part class=\"DIV\" id=\"a4tv_DIV_35\"/>"  +
-            " <part class=\"DIV\" id=\"a4tv_DIV_36\"/>"  +
-            " <part class=\"IMG\" id=\"a4tv_IMG_79\"/>"  +
-            " </part>"  +
-            "<part class=\"DIV\" id=\"a4tv_DIV_37\">"  +
-            " <part class=\"DIV\" id=\"a4tv_DIV_38\"/>"  +
-            " <part class=\"IMG\" id=\"a4tv_IMG_80\"/>"  +
-            " </part>"  +
-            "</part>"  +
-            "</part>"  +
-            "</part>"  +
-            " <part class=\"DIV\" id=\"notifications\"/>"  +
-            " <part class=\"VIDEO\" id=\"video\"/>"  +
-            " </part>"  +
-            "</part>"  +
-            "</structure>"  +
-            " <style>"  +
-            " <property part-name=\"a4tv_DIV_8\" name=\"target_up\">a4tv_DIV_11</property>"  +
-            " <property part-name=\"a4tv_DIV_8\" name=\"target_down\">a4tv_DIV_7</property>"  +
-            " <property part-name=\"a4tv_DIV_9\" name=\"target_up\">a4tv_DIV_8</property>"  +
-            " <property part-name=\"a4tv_DIV_9\" name=\"target_down\">a4tv_DIV_10</property>"  +
-            " <property part-name=\"a4tv_DIV_10\" name=\"target_up\">a4tv_DIV_9</property>"  +
-            " <property part-name=\"a4tv_DIV_10\" name=\"target_down\">a4tv_DIV_11</property>"  +
-            " <property part-name=\"a4tv_DIV_11\" name=\"target_up\">a4tv_DIV_10</property>"  +
-            " <property part-name=\"a4tv_DIV_11\" name=\"target_down\">a4tv_DIV_8</property>"  +
-            " <property part-name=\"a4tv_DIV_24\" name=\"target_right\">a4tv_DIV_28</property>" +
-            " <property part-name=\"a4tv_DIV_28\" name=\"target_right\">a4tv_DIV_32</property>" +
-            " </style>"  +
-            "</interface>"  +
-            "</uiml>"};
-
+            "<uiml xmlns=\"http://docs.oasis-open.org/uiml/ns/uiml4.0\">" +
+                    " <peers>" +
+                    "<presentation base=\" HTML_4.01frameset_Harmonia_0.1 \"/>" +
+                    " </peers>" +
+                    "<interface>" +
+                    "<structure>" +
+                    "<part class=\"application\" id=\"a4tv_app\"><part class=\"DIV\" id=\"main\"><part class=\"VIDEO\" id=\"video\"/><part class=\"DIV\" id=\"select-view\"><part class=\"DIV\" id=\"a4tv_DIV_3\"/><part class=\"DIV\" id=\"left-panel\"><part class=\"DIV\" id=\"logo\"/><part class=\"DIV\" id=\"category-list-scroller\"><part class=\"DIV\" id=\"category-list\"><part class=\"DIV\" id=\"a4tv_DIV_8\"/><part class=\"DIV\" id=\"a4tv_DIV_9\"/><part class=\"DIV\" id=\"a4tv_DIV_10\"/><part class=\"DIV\" id=\"a4tv_DIV_11\"/><part class=\"DIV\" id=\"a4tv_DIV_12\"/><part class=\"DIV\" id=\"a4tv_DIV_13\"/><part class=\"DIV\" id=\"a4tv_DIV_14\"/><part class=\"DIV\" id=\"a4tv_DIV_15\"/><part class=\"DIV\" id=\"a4tv_DIV_16\"/></part></part></part><part class=\"DIV\" id=\"a4tv_DIV_8\"/><part class=\"DIV\" id=\"info-panel\"><part class=\"DIV\" id=\"info-panel-title\"/><part class=\"DIV\" id=\"info-panel-desc\"/></part><part class=\"DIV\" id=\"channel-panel\"><part class=\"DIV\" id=\"a4tv_DIV_22\"/><part class=\"DIV\" id=\"a4tv_DIV_23\"/><part class=\"DIV\" id=\"a4tv_DIV_27\"/><part class=\"DIV\" id=\"a4tv_DIV_28\"/><part class=\"DIV\" id=\"a4tv_DIV_29\"/><part class=\"DIV\" id=\"a4tv_DIV_30\"/><part class=\"DIV\" id=\"a4tv_DIV_31\"><part class=\"IMG\" id=\"a4tv_IMG_32\"/><part class=\"DIV\" id=\"a4tv_DIV_33\"><part class=\"DIV\" id=\"a4tv_DIV_37\"><part class=\"IMG\" id=\"a4tv_IMG_38\"/><part class=\"DIV\" id=\"a4tv_DIV_39\"/><part class=\"DIV\" id=\"a4tv_DIV_40\"/><part class=\"DIV\" id=\"a4tv_DIV_41\"/><part class=\"DIV\" id=\"a4tv_DIV_42\"/></part><part class=\"DIV\" id=\"a4tv_DIV_43\"><part class=\"IMG\" id=\"a4tv_IMG_44\"/><part class=\"DIV\" id=\"a4tv_DIV_45\"/><part class=\"DIV\" id=\"a4tv_DIV_46\"/><part class=\"DIV\" id=\"a4tv_DIV_47\"/><part class=\"DIV\" id=\"a4tv_DIV_48\"/></part><part class=\"DIV\" id=\"a4tv_DIV_49\"><part class=\"IMG\" id=\"a4tv_IMG_50\"/><part class=\"DIV\" id=\"a4tv_DIV_51\"/><part class=\"DIV\" id=\"a4tv_DIV_52\"/><part class=\"DIV\" id=\"a4tv_DIV_53\"/><part class=\"DIV\" id=\"a4tv_DIV_54\"/></part><part class=\"DIV\" id=\"a4tv_DIV_55\"><part class=\"IMG\" id=\"a4tv_IMG_56\"/><part class=\"DIV\" id=\"a4tv_DIV_57\"/><part class=\"DIV\" id=\"a4tv_DIV_58\"/><part class=\"DIV\" id=\"a4tv_DIV_59\"/><part class=\"DIV\" id=\"a4tv_DIV_60\"/></part></part><part class=\"DIV\" id=\"a4tv_DIV_34\"/><part class=\"DIV\" id=\"a4tv_DIV_35\"/><part class=\"DIV\" id=\"a4tv_DIV_36\"/></part><part class=\"DIV\" id=\"a4tv_DIV_32\"/><part class=\"DIV\" id=\"a4tv_DIV_33\"><part class=\"DIV\" id=\"a4tv_DIV_31\"/></part></part><part class=\"INPUT\" id=\"search-input\"/></part><part class=\"DIV\" id=\"notifications\"/><part class=\"DIV\" id=\"full-screen-view\"><part class=\"DIV\" id=\"full-screen-title\"/><part class=\"DIV\" id=\"full-screen-progress\"><part class=\"DIV\" id=\"full-screen-progress-time\"/><part class=\"DIV\" id=\"full-screen-progress-indicator\"/><part class=\"DIV\" id=\"full-screen-progress-current-speed\"/><part class=\"DIV\" id=\"full-screen-progress-full-time\"/></part><part class=\"DIV\" id=\"full-screen-buttons\"><part class=\"DIV\" id=\"full-screen-button-back\"/><part class=\"DIV\" id=\"full-screen-button-pause\"/><part class=\"DIV\" id=\"full-screen-button-favorite\"/><part class=\"DIV\" id=\"full-screen-button-show-info\"/><part class=\"DIV\" id=\"full-screen-button-prev\"/><part class=\"DIV\" id=\"full-screen-button-current\"><part class=\"DIV\" id=\"full-screen-category\"/><part class=\"DIV\" id=\"full-screen-category-index\"/></part><part class=\"DIV\" id=\"full-screen-button-next\"/></part><part class=\"DIV\" id=\"full-screen-category-name\"/><part class=\"DIV\" id=\"full-screen-info\"><part class=\"DIV\" id=\"a4tv_DIV_34\"/><part class=\"DIV\" id=\"full-screen-info-details\"/><part class=\"DIV\" id=\"full-screen-info-title\"/><part class=\"DIV\" id=\"full-screen-info-description\"/></part></part><part class=\"DIV\" id=\"overlay\"/><part class=\"DIV\" id=\"about-page-view\"><part class=\"STRONG\" id=\"about-title\"/><part class=\"SPAN\" id=\"about-version\"/><part class=\"SPAN\" id=\"about-email\"/><part class=\"DIV\" id=\"a4tv_DIV_43\"/></part></part></part>" +
+                    "</structure>" +
+                    " <style>" +
+                    " <property part-name=\"a4tv_DIV_8\" name=\"target_up\">a4tv_DIV_16</property>" +
+                    " <property part-name=\"a4tv_DIV_8\" name=\"target_down\">a4tv_DIV_9</property>" +
+                    " <property part-name=\"a4tv_DIV_9\" name=\"target_up\">a4tv_DIV_8</property>" +
+                    " <property part-name=\"a4tv_DIV_9\" name=\"target_down\">a4tv_DIV_10</property>" +
+                    " <property part-name=\"a4tv_DIV_10\" name=\"target_up\">a4tv_DIV_9</property>" +
+                    " <property part-name=\"a4tv_DIV_10\" name=\"target_down\">a4tv_DIV_11</property>" +
+                    " <property part-name=\"a4tv_DIV_11\" name=\"target_up\">a4tv_DIV_10</property>" +
+                    " <property part-name=\"a4tv_DIV_11\" name=\"target_down\">a4tv_DIV_12</property>" +
+                    " <property part-name=\"a4tv_DIV_12\" name=\"target_up\">a4tv_DIV_11</property>" +
+                    " <property part-name=\"a4tv_DIV_12\" name=\"target_down\">a4tv_DIV_13</property>" +
+                    " <property part-name=\"a4tv_DIV_13\" name=\"target_up\">a4tv_DIV_12</property>" +
+                    " <property part-name=\"a4tv_DIV_13\" name=\"target_down\">a4tv_DIV_14</property>" +
+                    " <property part-name=\"a4tv_DIV_14\" name=\"target_up\">a4tv_DIV_13</property>" +
+                    " <property part-name=\"a4tv_DIV_14\" name=\"target_down\">a4tv_DIV_15</property>" +
+                    " <property part-name=\"a4tv_DIV_15\" name=\"target_up\">a4tv_DIV_14</property>" +
+                    " <property part-name=\"a4tv_DIV_15\" name=\"target_down\">a4tv_DIV_16</property>" +
+                    " <property part-name=\"a4tv_DIV_16\" name=\"target_up\">a4tv_DIV_15</property>" +
+                    " <property part-name=\"a4tv_DIV_16\" name=\"target_down\">a4tv_DIV_8</property>" +
+                    " <property part-name=\"a4tv_DIV_20\" name=\"target_right\">a4tv_DIV_24</property>" +
+                    " <property part-name=\"a4tv_DIV_20\" name=\"target_left\">a4tv_DIV_14</property>" +
+                    " <property part-name=\"a4tv_DIV_22\" name=\"target_right\">a4tv_DIV_30</property>" +
+                    " <property part-name=\"a4tv_DIV_24\" name=\"target_right\">a4tv_DIV_30</property>" +
+                    " <property part-name=\"a4tv_DIV_28\" name=\"target_right\">a4tv_DIV_36</property>" +
+                    " <property part-name=\"a4tv_DIV_30\" name=\"target_right\">a4tv_DIV_36</property>" +
+                    " <property part-name=\"a4tv_DIV_30\" name=\"target_left\">a4tv_DIV_26</property>" +
+                    " <property part-name=\"a4tv_DIV_34\" name=\"target_right\">a4tv_DIV_40</property>" +
+                    " <property part-name=\"a4tv_DIV_36\" name=\"target_right\">a4tv_DIV_40</property>" +
+                    " <property part-name=\"a4tv_DIV_36\" name=\"target_left\">a4tv_DIV_30</property>" +
+                    " <property part-name=\"a4tv_DIV_40\" name=\"target_right\">a4tv_DIV_46</property>" +
+                    " <property part-name=\"a4tv_DIV_42\" name=\"target_right\">a4tv_DIV_46</property>" +
+                    " <property part-name=\"a4tv_DIV_42\" name=\"target_left\">a4tv_DIV_36</property>" +
+                    " <property part-name=\"a4tv_DIV_46\" name=\"target_right\">a4tv_DIV_52</property>" +
+                    " <property part-name=\"a4tv_DIV_48\" name=\"target_right\">a4tv_DIV_52</property>" +
+                    " <property part-name=\"a4tv_DIV_48\" name=\"target_left\">a4tv_DIV_42</property>" +
+                    " <property part-name=\"a4tv_DIV_52\" name=\"target_right\">a4tv_DIV_58</property>" +
+                    " <property part-name=\"a4tv_DIV_54\" name=\"target_right\">a4tv_DIV_58</property>" +
+                    " <property part-name=\"a4tv_DIV_54\" name=\"target_left\">a4tv_DIV_48</property>" +
+                    " <property part-name=\"a4tv_DIV_58\" name=\"target_right\">a4tv_DIV_64</property>" +
+                    " <property part-name=\"a4tv_DIV_60\" name=\"target_right\">a4tv_DIV_64</property>" +
+                    " <property part-name=\"a4tv_DIV_60\" name=\"target_left\">a4tv_DIV_54</property>" +
+                    " <property part-name=\"a4tv_DIV_64\" name=\"target_right\">a4tv_DIV_70</property>" +
+                    " <property part-name=\"a4tv_DIV_66\" name=\"target_right\">a4tv_DIV_70</property>" +
+                    " <property part-name=\"a4tv_DIV_66\" name=\"target_left\">a4tv_DIV_60</property>" +
+                    " <property part-name=\"a4tv_DIV_70\" name=\"target_right\">a4tv_DIV_76</property>" +
+                    " <property part-name=\"a4tv_DIV_72\" name=\"target_right\">a4tv_DIV_76</property>" +
+                    " <property part-name=\"a4tv_DIV_72\" name=\"target_left\">a4tv_DIV_66</property>" +
+                    " <property part-name=\"a4tv_DIV_76\" name=\"target_right\">a4tv_DIV_82</property>" +
+                    " <property part-name=\"a4tv_DIV_78\" name=\"target_right\">a4tv_DIV_82</property>" +
+                    " <property part-name=\"a4tv_DIV_78\" name=\"target_left\">a4tv_DIV_72</property>" +
+                    " <property part-name=\"a4tv_DIV_82\" name=\"target_right\">a4tv_DIV_88</property>" +
+                    " <property part-name=\"a4tv_DIV_84\" name=\"target_right\">a4tv_DIV_88</property>" +
+                    " <property part-name=\"a4tv_DIV_84\" name=\"target_left\">a4tv_DIV_78</property>" +
+                    " <property part-name=\"a4tv_DIV_88\" name=\"target_right\">a4tv_DIV_94</property>" +
+                    " <property part-name=\"a4tv_DIV_90\" name=\"target_right\">a4tv_DIV_94</property>" +
+                    " <property part-name=\"a4tv_DIV_90\" name=\"target_left\">a4tv_DIV_84</property>" +
+                    " <property part-name=\"a4tv_DIV_94\" name=\"target_right\">a4tv_DIV_100</property>" +
+                    " <property part-name=\"a4tv_DIV_96\" name=\"target_right\">a4tv_DIV_100</property>" +
+                    " <property part-name=\"a4tv_DIV_96\" name=\"target_left\">a4tv_DIV_90</property>" +
+                    " <property part-name=\"a4tv_DIV_100\" name=\"target_right\">a4tv_DIV_106</property>" +
+                    " <property part-name=\"a4tv_DIV_102\" name=\"target_right\">a4tv_DIV_106</property>" +
+                    " <property part-name=\"a4tv_DIV_102\" name=\"target_left\">a4tv_DIV_96</property>" +
+                    " <property part-name=\"a4tv_DIV_106\" name=\"target_right\">a4tv_DIV_112</property> " +
+                    " <property part-name=\"a4tv_DIV_108\" name=\"target_right\">a4tv_DIV_112</property> " +
+                    " <property part-name=\"a4tv_DIV_108\" name=\"target_left\">a4tv_DIV_102</property> " +
+                    " <property part-name=\"a4tv_DIV_112\" name=\"target_right\">a4tv_DIV_118</property> " +
+                    " <property part-name=\"a4tv_DIV_114\" name=\"target_right\">a4tv_DIV_118</property> " +
+                    " <property part-name=\"a4tv_DIV_114\" name=\"target_left\">a4tv_DIV_108</property> " +
+                    " <property part-name=\"a4tv_DIV_118\" name=\"target_right\">a4tv_DIV_124</property> " +
+                    " <property part-name=\"a4tv_DIV_120\" name=\"target_right\">a4tv_DIV_124</property> " +
+                    " <property part-name=\"a4tv_DIV_120\" name=\"target_left\">a4tv_DIV_114</property> " +
+                    " <property part-name=\"a4tv_DIV_124\" name=\"target_right\">a4tv_DIV_130</property> " +
+                    " <property part-name=\"a4tv_DIV_126\" name=\"target_right\">a4tv_DIV_130</property> " +
+                    " <property part-name=\"a4tv_DIV_126\" name=\"target_left\">a4tv_DIV_120</property> " +
+                    " <property part-name=\"a4tv_DIV_132\" name=\"target_left\">a4tv_DIV_126</property> " +
+                    " <property part-name=\"full-screen-button-back\" name=\"target_right\">full-screen-button-pause</property> " +
+                    " <property part-name=\"full-screen-button-back\" name=\"target_left\">full-screen-button-next</property> " +
+                    " <property part-name=\"full-screen-button-back\" name=\"target_up\">full-screen-progress-indicator</property> " +
+                    " <property part-name=\"full-screen-button-back\" name=\"target_down\">full-screen-progress-indicator</property> " +
+                    " <property part-name=\"full-screen-button-pause\" name=\"target_left\">full-screen-button-back</property> " +
+                    " <property part-name=\"full-screen-button-pause\" name=\"target_right\">full-screen-button-favorite</property> " +
+                    " <property part-name=\"full-screen-button-pause\" name=\"target_up\">full-screen-progress-indicator</property> " +
+                    " <property part-name=\"full-screen-button-pause\" name=\"target_down\">full-screen-progress-indicator</property> " +
+                    " <property part-name=\"full-screen-button-favorite\" name=\"target_left\">full-screen-button-pause</property> " +
+                    " <property part-name=\"full-screen-button-favorite\" name=\"target_right\">full-screen-button-show-info</property> " +
+                    " <property part-name=\"full-screen-button-favorite\" name=\"target_up\">full-screen-progress-indicator</property> " +
+                    " <property part-name=\"full-screen-button-favorite\" name=\"target_down\">full-screen-progress-indicator</property> " +
+                    " <property part-name=\"full-screen-button-show-info\" name=\"target_left\">full-screen-button-favorite</property> " +
+                    " <property part-name=\"full-screen-button-show-info\" name=\"target_right\">full-screen-button-prev</property> " +
+                    " <property part-name=\"full-screen-button-show-info\" name=\"target_up\">full-screen-progress-indicator</property> " +
+                    " <property part-name=\"full-screen-button-show-info\" name=\"target_down\">full-screen-progress-indicator</property> " +
+                    " <property part-name=\"full-screen-button-prev\" name=\"target_left\">full-screen-button-show-info</property> " +
+                    " <property part-name=\"full-screen-button-prev\" name=\"target_right\">full-screen-category-index</property> " +
+                    " <property part-name=\"full-screen-button-prev\" name=\"target_up\">full-screen-progress-indicator</property> " +
+                    " <property part-name=\"full-screen-button-prev\" name=\"target_down\">full-screen-progress-indicator</property> " +
+                    " <property part-name=\"full-screen-category-index\" name=\"target_left\">full-screen-button-prev</property> " +
+                    " <property part-name=\"full-screen-category-index\" name=\"target_right\">full-screen-button-next</property> " +
+                    " <property part-name=\"full-screen-category-index\" name=\"target_up\">full-screen-progress-indicator</property> " +
+                    " <property part-name=\"full-screen-category-index\" name=\"target_down\">full-screen-progress-indicator</property> " +
+                    " <property part-name=\"full-screen-button-next\" name=\"target_left\">full-screen-category-index</property> " +
+                    " <property part-name=\"full-screen-button-next\" name=\"target_right\">full-screen-button-back</property> " +
+                    " <property part-name=\"full-screen-button-next\" name=\"target_up\">full-screen-progress-indicator</property> " +
+                    " <property part-name=\"full-screen-button-next\" name=\"target_down\">full-screen-progress-indicator</property> " +
+                    " </style>" +
+                    "</interface>" +
+                    "</uiml>"};
 
     public A4TVMobileClient(String hostName, int portNumber, boolean useTTS,int mode, Context context) {
         this.hostName = hostName;
@@ -597,7 +687,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                 String lastMsg ="";
 
                 while ((fromServer = in.readLine()) != null) {
-
+                    System.err.println("Receiced Message from STB");
                     if(lastMsg.compareTo(fromServer) == 0){
                         //lastMsg = fromServer;
                         stopSpeech();
@@ -606,7 +696,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                         ArrayList<Action> actions = new ArrayList<Action>();
                         actions.addAll(states.get(currentStateIndex).getActions());
                         for (Action a : actions) {
-                            userInterfaceEventManager.addAction("current_block_info", a._block_type, a._block_orientation, a._item_index, "-", a._current_level, a._interaction_mode);
+                            userInterfaceEventManager.addAction("current_block_info", a._block_type, a._block_orientation, a._item_index, a._item_name,"-", a._current_level, a._interaction_mode);
                         }
 
 
@@ -677,10 +767,24 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
             }
         });
 
+        /*
         if(useTTS)
-            speaker.speak("A A4TV desligou-se da sua televisão", TextToSpeech.QUEUE_FLUSH);
+            speaker.speak("A A4TV vai voltar a ligar à sua televisão", TextToSpeech.QUEUE_FLUSH);
         else
-            writeOnText("A A4TV desligou-se da sua televisão");
+            writeOnText("A A4TV vai voltar a ligar à sua televisão");
+            */
+
+        //if was not the user try to reconnect
+        if(!closeConnectionByUser) {
+            /*Thread cT = new Thread(this);
+            cT.start();*/
+            runOnUiThread(new Runnable() {
+                public void run()
+                {
+                    A4TVMainActivity.checkConnectionButton();
+                }
+            });
+        }
 
     }
 
@@ -741,7 +845,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                     ArrayList<Action> actions = new ArrayList<Action>();
                     actions.addAll(states.get(currentStateIndex).getActions());
                     for (Action a : actions) {
-                        userInterfaceEventManager.addAction("current_block_info", a._block_type, a._block_orientation, a._item_index, "-", a._current_level, a._interaction_mode);
+                        userInterfaceEventManager.addAction("current_block_info", a._block_type, a._block_orientation, a._item_index, a._item_name, "-", a._current_level, a._interaction_mode);
                     }
                 }
 
@@ -826,13 +930,13 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                         System.err.println("Getting position: " + position);
                         String pos[] = position.split(";");
 
-                        int posX = Integer.parseInt(pos[0]);
-                        int posY = Integer.parseInt(pos[1]);
+                        //int posX = Integer.parseInt(pos[0]);
+                        //int posY = Integer.parseInt(pos[1]);
                         String dimensions = uimlParser.getPropertyValueFromPartName(blockId, "dimensions");
                         String block_type = uimlParser.getPropertyValueFromPartName(blockId, "type");
                         System.err.println("Getting Dimensions: " + dimensions);
-                        int width = Integer.parseInt(dimensions.split(";")[0]);
-                        int height = Integer.parseInt(dimensions.split(";")[1]);
+                        //int width = Integer.parseInt(dimensions.split(";")[0]);
+                        //int height = Integer.parseInt(dimensions.split(";")[1]);
 
                         //store info about the current focused element and block
                     /*String block_type = "-"; // types: menu, content, title
@@ -863,7 +967,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                     */
 
                         if(!userCommand) {
-                            Action action = userInterfaceEventManager.addAction("current_block_info", block_type, orientation, index + "/" + count, "-", readingMode + "." + focusMode, interactionMode + "");
+                            Action action = userInterfaceEventManager.addAction("current_block_info", block_type, orientation, index + "/" + count, elemId.get(temp) , "-", readingMode + "." + focusMode, interactionMode + "");
                             states.get(currentStateIndex).addAction(action);
                         }
 
@@ -894,19 +998,19 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                 if (readingMode == A4TVMobileClient.VERBOSE && focusMode == A4TVMobileClient.FOCUS_MAP) {
                     //map mode
                     UIMLParser uMap = new UIMLParser();
-
-                    if (uimlParser.getPropertyValueFromPartName("a4tv_app", "title").compareTo("Universal RSS Reader") != 0) {
-                        if (uimlParser.getPropertyValueFromPartName("a4tv_DIV_9", "focused").compareTo("true") != 0) {
-                            uMap.setUIML(hardcodedMapCocorico[0]);
-                            System.err.println("Using map 0");
-                        } else {
-                            uMap.setUIML(hardcodedMapCocorico[1]);
-                            System.err.println("Using map 1");
-                        }
-                    } else {
-                        uMap.setUIML(hardcodedMapIgModa[0]);
+                    System.err.println("Application  " +  uimlParser.getPropertyValueFromPartName("a4tv_app", "title"));
+                    switch(uimlParser.getPropertyValueFromPartName("a4tv_app", "title")){
+                        case "A4TV Accessible Browser": uMap.setUIML(hardcodedStoreTemplate[0]); break;
+                        case "Cocoricó" : uMap.setUIML(hardcodedMapVideoTemplate[0]); break;
+                        case " Videotemplate " : uMap.setUIML(hardcodedMapVideoTemplate[1]); break;
+                        case "Universal RSS Reader" : uMap.setUIML(hardcodedMapIGTemplate[0]); break;
+                        default: uMap.setUIML(hardcodedMapVideoTemplate[0]);break;
                     }
 
+                    boolean checkUp = false;
+                    boolean checkDown = false;
+                    boolean checkLeft = false;
+                    boolean checkRight = false;
                     for (String id : focused) {
 
                         String idUp = uMap.getPropertyValueFromPartName(id, "target_up");
@@ -918,25 +1022,29 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                         String idRight = uMap.getPropertyValueFromPartName(id, "target_right");
                         String navRight = uimlParser.getDescription(idRight);
 
-                        if (navUp.compareTo("") != 0) {
-                            if (navUp.length() >= 80)
+                        if (navUp.compareTo("") != 0 && !checkUp) {
+                            if (navUp.length() >= 100)
                                 navUp = "bloco de texto";
                             ttsQueue.add(" cima. " + navUp + ". ");
+                            checkUp = true;
                         }
-                        if (navDown.compareTo("") != 0) {
-                            if (navDown.length() >= 80)
+                        if (navDown.compareTo("") != 0 && !checkDown) {
+                            if (navDown.length() >= 100)
                                 navDown = "bloco de texto";
                             ttsQueue.add(" baixo. " + navDown + ". ");
+                            checkDown = true;
                         }
-                        if (navLeft.compareTo("") != 0) {
-                            if (navLeft.length() >= 80)
+                        if (navLeft.compareTo("") != 0 && !checkLeft) {
+                            if (navLeft.length() >= 100)
                                 navLeft = "bloco de texto";
                             ttsQueue.add(" esquerda. " + navLeft + ". ");
+                            checkLeft = true;
                         }
-                        if (navRight.compareTo("") != 0) {
-                            if (navRight.length() >= 80)
+                        if (navRight.compareTo("") != 0 && !checkRight) {
+                            if (navRight.length() >= 100)
                                 navRight = "bloco de texto";
                             ttsQueue.add(" direita. " + navRight + ". ");
+                            checkRight = true;
                         }
 
                     }
@@ -1097,21 +1205,27 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
 
 
             out.flush();
+        }else{
+            System.out.println("Could not send command to STB: " + cmd);
         }
     }
 
     public void shutDownConnection(){
         try {
+            connected = false;
+            closeConnectionByUser = true;
+
             kkSocket.close();
             out.close();
             in.close();
             stdIn.close();
-            connected = false;
+
             if(useTTS)
                 speaker.speak("A A4TV desligou-se da sua televisão", TextToSpeech.QUEUE_FLUSH);
             else
                 writeOnText("A A4TV desligou-se da sua televisão");
 
+            closeConnectionByUser = false;
 
         }catch(IOException e) {
             System.err.println("Couldn't shutdown connection");

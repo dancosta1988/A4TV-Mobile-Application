@@ -77,6 +77,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
     private static Button btnLEFT;
     private static Button btnRIGHT;
     private static Button btnOK;
+    private static Button btnBACK;
     private static Button btnReadScreen;
     private static Button btnREPEAT;
     private static Button btnINTER;
@@ -120,15 +121,15 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
                         System.err.println("Wave in roll:" + relativeRoll + "pitch compensation: " + pitchCompensation + " pitch: " + +pitch);
                         if ((relativeRoll - pitchCompensation) == 0) {
                             System.err.println("Swipe Left");
-                            userInterfaceEventManager.addAction(Action.LEFT, "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
+                            userInterfaceEventManager.addAction(Action.LEFT, "-", "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
                             sendKeyboardInstruction(A4TVMobileClient.KEY_LEFT);
                         } else if ((relativeRoll - pitchCompensation) == 1) {
                             System.err.println("Swipe Down");
-                            userInterfaceEventManager.addAction(Action.DOWN, "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
+                            userInterfaceEventManager.addAction(Action.DOWN, "-", "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
                             sendKeyboardInstruction(A4TVMobileClient.KEY_DOWN);
                         }
                     } else if (gestureMode == 1) {
-                        userInterfaceEventManager.addAction(Action.LOCALIZE, "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction(Action.LOCALIZE, "-", "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
                         localize();
                     }
                     break;
@@ -137,26 +138,26 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
                         System.err.println("Wave out roll:" + relativeRoll + "pitch compensation: " + pitchCompensation + " pitch: " + +pitch);
                         if ((relativeRoll + pitchCompensation) == 0) {
                             System.err.println("Swipe Right");
-                            userInterfaceEventManager.addAction(Action.RIGHT, "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
+                            userInterfaceEventManager.addAction(Action.RIGHT, "-", "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
                             sendKeyboardInstruction(A4TVMobileClient.KEY_RIGHT);
                         } else if ((relativeRoll + pitchCompensation) == 1) {
                             System.err.println("Swipe Up");
-                            userInterfaceEventManager.addAction(Action.UP, "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
+                            userInterfaceEventManager.addAction(Action.UP, "-", "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
                             sendKeyboardInstruction(A4TVMobileClient.KEY_UP);
                         }
                     }else if (gestureMode == 1) {
-                        userInterfaceEventManager.addAction(Action.READ_SCREEN, "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction(Action.READ_SCREEN, "-", "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
                         readScreen();
                     }
                     break;
                 case DOUBLE_TAP:
                     System.err.println("Confirmation");
-                    userInterfaceEventManager.addAction(Action.OK, "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
+                    userInterfaceEventManager.addAction(Action.OK, "-", "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
                     sendKeyboardInstruction(A4TVMobileClient.KEY_OK);
                     break;
                 case FIST:
                     if (gestureMode == 0) {
-                        userInterfaceEventManager.addAction(Action.LOCALIZE, "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction(Action.LOCALIZE, "-", "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
                         localize();
                     } else if (gestureMode == 1) {
                         normalizationPitch = pitch;
@@ -166,12 +167,12 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
                 case FINGERS_SPREAD:
                     if (gestureMode == 0) {
                         if (recognizerIntent != null) {
-                            userInterfaceEventManager.addAction(Action.START_SPEECH, "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
+                            userInterfaceEventManager.addAction(Action.START_SPEECH, "-", "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
                             sr.startListening(recognizerIntent);
                         }
                     } else if (gestureMode == 1) {
                         if (recognizerIntent != null) {
-                            userInterfaceEventManager.addAction(Action.START_SPEECH, "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
+                            userInterfaceEventManager.addAction(Action.START_SPEECH, "-", "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
                             sr.startListening(recognizerIntent);
                         }
 
@@ -221,19 +222,19 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
 
                     if (diffPitch > 0) {
                         System.err.println("Swipe Up");
-                        userInterfaceEventManager.addAction(Action.UP, "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction(Action.UP, "-", "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
                         sendKeyboardInstruction(A4TVMobileClient.KEY_UP);
                     } else if (diffPitch < 0) {
                         System.err.println("Swipe Down");
-                        userInterfaceEventManager.addAction(Action.DOWN, "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction(Action.DOWN, "-", "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
                         sendKeyboardInstruction(A4TVMobileClient.KEY_DOWN);
                     } else if (diffYaw > 0) {
                         System.err.println("Swipe Left");
-                        userInterfaceEventManager.addAction(Action.LEFT, "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction(Action.LEFT, "-", "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
                         sendKeyboardInstruction(A4TVMobileClient.KEY_LEFT);
                     } else if (diffYaw < 0) {
                         System.err.println("Swipe Right");
-                        userInterfaceEventManager.addAction(Action.RIGHT, "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction(Action.RIGHT, "-", "-", "-", "-", "mid_air_gesture", readingMode + "." + focusMode, interactMode + "");
                         sendKeyboardInstruction(A4TVMobileClient.KEY_RIGHT);
                     }
 
@@ -281,6 +282,9 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
             btnREPEAT = (Button) findViewById(R.id.btnREPEAT);
             btnREPEAT.setOnClickListener(this);
             btnREPEAT.setOnTouchListener(this);
+            btnBACK = (Button) findViewById(R.id.btnBack);
+            btnBACK.setOnClickListener(this);
+            btnBACK.setOnTouchListener(this);
             btnINTER = (Button) findViewById(R.id.btnSpeech);
             btnINTER.setOnClickListener(this);
             btnINTER.setOnTouchListener(this);
@@ -292,12 +296,12 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
             btnConnect.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
-                        userInterfaceEventManager.addAction("connected to tv", "-", "-", "-", "button", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction("connected to tv", "-", "-", "-", "-", "button", readingMode + "." + focusMode, interactMode + "");
                         // The toggle is enabled
                         connect();
                     } else {
                         // The toggle is disabled
-                        userInterfaceEventManager.addAction("disconnected from tv", "-", "-", "-", "button", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction("disconnected from tv", "-", "-", "-", "-", "button", readingMode + "." + focusMode, interactMode + "");
                         disconnect();
                     }
                 }
@@ -351,40 +355,40 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
             A4TVGestureListener customGestureDetector = new A4TVGestureListener() {
                 public void onSwipeRight() {
                     System.err.println("Swipe Right");
-                    userInterfaceEventManager.addAction(Action.RIGHT, "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
+                    userInterfaceEventManager.addAction(Action.RIGHT, "-", "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
                     sendKeyboardInstruction(A4TVMobileClient.KEY_RIGHT);
 
                 }
 
                 public void onSwipeLeft() {
                     System.err.println("Swipe Left");
-                    userInterfaceEventManager.addAction(Action.LEFT, "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
+                    userInterfaceEventManager.addAction(Action.LEFT, "-", "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
                     sendKeyboardInstruction(A4TVMobileClient.KEY_LEFT);
                 }
 
                 public void onSwipeTop() {
                     System.err.println("Swipe Up");
-                    userInterfaceEventManager.addAction(Action.UP, "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
+                    userInterfaceEventManager.addAction(Action.UP, "-", "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
                     sendKeyboardInstruction(A4TVMobileClient.KEY_UP);
 
                 }
 
                 public void onSwipeBottom() {
                     System.err.println("Swipe Down");
-                    userInterfaceEventManager.addAction(Action.DOWN, "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
+                    userInterfaceEventManager.addAction(Action.DOWN, "-", "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
                     sendKeyboardInstruction(A4TVMobileClient.KEY_DOWN);
                 }
 
                 public void onDoubletap() {
                     System.err.println("Confirmation");
-                    userInterfaceEventManager.addAction(Action.OK, "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
+                    userInterfaceEventManager.addAction(Action.OK, "-", "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
                     sendKeyboardInstruction(A4TVMobileClient.KEY_OK);
                 }
 
                 public void holdingDown() {
                     System.err.println("Holding down");
                     if (recognizerIntent != null) {
-                        userInterfaceEventManager.addAction("start speech", "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction("start speech", "-", "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
                         sr.startListening(recognizerIntent);
                     }
                 }
@@ -392,7 +396,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
                 public void onSingleTap() {
                     System.err.println("SingleTap");
                     if (recognizerIntent != null) {
-                        userInterfaceEventManager.addAction(Action.LOCALIZE, "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction(Action.LOCALIZE, "-", "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
                         localize();
                     }
                 }
@@ -531,7 +535,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
                     if (!userInterfaceEventManager.hasUserDoneTutorial()) {
                         //run tutorial
                         dialogs.startTutorial();
-                        userInterfaceEventManager.addAction("begin_tutorial", "-", "-", "-", "none", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction("begin_tutorial", "-", "-", "-", "-", "none", readingMode + "." + focusMode, interactMode + "");
                         getUserPreferences();
                         storeUserPreferences();
                     }
@@ -558,7 +562,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void checkForAccessibilityIssues(){
-        userInterfaceEventManager.addAction("check_user_events", "-", "-", "-", "-", readingMode + "." + focusMode, interactMode + "");
+        userInterfaceEventManager.addAction("check_user_events", "-", "-", "-", "-", "-", readingMode + "." + focusMode, interactMode + "");
 
         if(userInterfaceEventManager.isUserExperiencedWithVerbose() && readingMode == A4TVMobileClient.VERBOSE) {
             dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que o utilizador já tem alguma experiência," +
@@ -708,27 +712,29 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnUP: sendKeyboardInstruction(A4TVMobileClient.KEY_UP);
-                userInterfaceEventManager.addAction(Action.UP, "-", "-" , "-" ,"button", readingMode+"."+focusMode, interactMode+""); break;
+                userInterfaceEventManager.addAction(Action.UP, "-", "-" , "-" , "-" ,"button", readingMode+"."+focusMode, interactMode+""); break;
             case R.id.btnDOWN: sendKeyboardInstruction(A4TVMobileClient.KEY_DOWN);
-                userInterfaceEventManager.addAction(Action.DOWN, "-", "-" , "-" ,"button", readingMode+"."+focusMode, interactMode+""); break;
+                userInterfaceEventManager.addAction(Action.DOWN, "-", "-" , "-" , "-","button", readingMode+"."+focusMode, interactMode+""); break;
             case R.id.btnLEFT: sendKeyboardInstruction(A4TVMobileClient.KEY_LEFT);
-                userInterfaceEventManager.addAction(Action.LEFT, "-", "-" , "-" ,"button", readingMode+"."+focusMode, interactMode+""); break;
+                userInterfaceEventManager.addAction(Action.LEFT, "-", "-" , "-" , "-","button", readingMode+"."+focusMode, interactMode+""); break;
             case R.id.btnRIGHT: sendKeyboardInstruction(A4TVMobileClient.KEY_RIGHT);
-                userInterfaceEventManager.addAction(Action.RIGHT, "-", "-" , "-" ,"button", readingMode+"."+focusMode, interactMode+""); break;
+                userInterfaceEventManager.addAction(Action.RIGHT, "-", "-" , "-", "-" ,"button", readingMode+"."+focusMode, interactMode+""); break;
             case R.id.btnOK: sendKeyboardInstruction(A4TVMobileClient.KEY_OK);
-                userInterfaceEventManager.addAction(Action.OK, "-", "-" , "-" ,"button", readingMode+"."+focusMode, interactMode+""); break;
+                userInterfaceEventManager.addAction(Action.OK, "-", "-" , "-" , "-","button", readingMode+"."+focusMode, interactMode+""); break;
+            case R.id.btnBack: sendKeyboardInstruction(A4TVMobileClient.KEY_BACK);
+                userInterfaceEventManager.addAction(Action.BACK, "-", "-" , "-" , "-","button", readingMode+"."+focusMode, interactMode+"");break;
             case R.id.btnREPEAT:
-                userInterfaceEventManager.addAction(Action.LOCALIZE, "-", "-" , "-" ,"button", readingMode+"."+focusMode, interactMode+"");
+                userInterfaceEventManager.addAction(Action.LOCALIZE, "-", "-" , "-" , "-","button", readingMode+"."+focusMode, interactMode+"");
                 localize(); break;
             case R.id.btnSpeech:
                 interrupt();
                 if(recognizerIntent != null) {
-                    userInterfaceEventManager.addAction(Action.START_SPEECH, "-", "-" , "-" ,"button", readingMode+"."+focusMode, interactMode+"");
+                    userInterfaceEventManager.addAction(Action.START_SPEECH, "-", "-" , "-", "-" ,"button", readingMode+"."+focusMode, interactMode+"");
                     sr.startListening(recognizerIntent);
                 }
                 break;
             case R.id.btnReadScreen:
-                userInterfaceEventManager.addAction(Action.READ_SCREEN,"-", "-" , "-" , "button", readingMode+"."+focusMode, interactMode+"");
+                userInterfaceEventManager.addAction(Action.READ_SCREEN,"-", "-" , "-" , "-", "button", readingMode+"."+focusMode, interactMode+"");
                 readScreen(); break;
                        //.... etc
         }
@@ -775,6 +781,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
         //btnREPEAT.requestLayout();
         btnINTER.setVisibility(View.VISIBLE);
         //btnINTER.requestLayout();
+        btnBACK.setVisibility(View.VISIBLE);
     }
 
     public static void hideButtons(){
@@ -792,11 +799,13 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
         btnReadScreen.requestLayout();
         btnREPEAT.setVisibility(View.GONE);
         btnREPEAT.requestLayout();
+        btnBACK.setVisibility(View.GONE);
+        btnBACK.requestLayout();
         btnINTER.setVisibility(View.GONE);
         btnINTER.requestLayout();
     }
 
-    private void connect(){
+    public void connect(){
         myVib.vibrate(200);
         getUserPreferences();
 
@@ -837,6 +846,11 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
         uncheckConnectionButton();
 
 
+    }
+
+    public static void checkConnectionButton(){
+        if(!btnConnect.isChecked())
+            btnConnect.setChecked(true);
     }
 
     public static void uncheckConnectionButton(){
@@ -952,6 +966,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
             case R.id.btnOK:
             case R.id.btnREPEAT:
             case R.id.btnSpeech:
+            case R.id.btnBack:
             case R.id.btnReadScreen:touch.onTouch(touch_view, motionEvent);System.err.println(  "Returned false"); return false;
             default: System.err.println(  "Returned true"); return true;
             //.... etc
@@ -1050,7 +1065,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
                         if (focusedElem.contains(recognized)) {
                             sendKeyboardInstruction(A4TVMobileClient.KEY_OK);
                             shouldBreak = true;
-                            userInterfaceEventManager.addAction(Action.OK, "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
+                            userInterfaceEventManager.addAction(Action.OK, "-", "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
                             break;
                         }
                     }
@@ -1064,50 +1079,55 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
                     case Action.OK:
                         sendKeyboardInstruction(A4TVMobileClient.KEY_OK);
                         shouldBreak = true;
-                        userInterfaceEventManager.addAction(Action.OK, "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction(Action.OK, "-", "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
                         break;
                     case "cima":
                         sendKeyboardInstruction(A4TVMobileClient.KEY_UP);
                         shouldBreak = true;
-                        userInterfaceEventManager.addAction(Action.UP, "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction(Action.UP, "-", "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
                         break;
                     case "baixo":
                         sendKeyboardInstruction(A4TVMobileClient.KEY_DOWN);
                         shouldBreak = true;
-                        userInterfaceEventManager.addAction(Action.DOWN, "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction(Action.DOWN, "-", "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
                         break;
                     case "esquerda":
                         sendKeyboardInstruction(A4TVMobileClient.KEY_LEFT);
                         shouldBreak = true;
-                        userInterfaceEventManager.addAction(Action.LEFT, "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction(Action.LEFT, "-", "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
                         break;
                     case "direita":
                         sendKeyboardInstruction(A4TVMobileClient.KEY_RIGHT);
                         shouldBreak = true;
-                        userInterfaceEventManager.addAction(Action.RIGHT, "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction(Action.RIGHT, "-", "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
+                        break;
+                    case "voltar":
+                        sendKeyboardInstruction(A4TVMobileClient.KEY_BACK);
+                        shouldBreak = true;
+                        userInterfaceEventManager.addAction(Action.BACK, "-", "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
                         break;
                     case "ligar":
                         connect();
                         shouldBreak = true;
-                        userInterfaceEventManager.addAction(Action.CONNECT, "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction(Action.CONNECT, "-", "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
                         break;
                     case "desligar":
                         disconnect();
                         shouldBreak = true;
-                        userInterfaceEventManager.addAction(Action.DISCONNECT, "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction(Action.DISCONNECT, "-", "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
                         break;
                     case "ler":
                         readScreen();
                         shouldBreak = true;
-                        userInterfaceEventManager.addAction(Action.READ_SCREEN, "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction(Action.READ_SCREEN, "-", "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
                         break;
                     case "localizar":
-                        userInterfaceEventManager.addAction(Action.LOCALIZE, "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction(Action.LOCALIZE, "-", "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
                         localize();
                         shouldBreak = true;
                         break;
                     case "parar":
-                        userInterfaceEventManager.addAction("interrupt", "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction("interrupt", "-", "-", "-", "-", "speech", readingMode + "." + focusMode, interactMode + "");
                         interrupt();
                         shouldBreak = true;
                         break;

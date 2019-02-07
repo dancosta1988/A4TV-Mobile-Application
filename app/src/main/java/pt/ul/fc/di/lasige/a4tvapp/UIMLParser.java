@@ -64,24 +64,25 @@ public class UIMLParser {
         }
 
 
-            ArrayList<String> childs = getChildPartsWithId(id);
-            // System.err.println(" Didnt find! Has childs? " + childs.size());
-            for (String child : childs) {
-                //text = getPropertyValueFromPartName(child, "text");//child description
-                //recursion
-                //System.err.println(" Didnt find lets see the child  "+ child);
-                String desChild = getDescription(child);
-                if(!text.contains(desChild))
-                    text += " " + desChild;
-                if(text != "" && text.charAt(text.length()-1) != '.')
-                    text += ". ";
-                    /*if (text == "") {
-                        text = getPropertyValueFromPartName(child, "label"); //child label
-                    }
-                    if (text != "") {
-                        break;
-                    }*/
-            }
+        ArrayList<String> childs = getChildPartsWithId(id);
+        // System.err.println(" Didnt find! Has childs? " + childs.size());
+        for (String child : childs) {
+            //text = getPropertyValueFromPartName(child, "text");//child description
+            //recursion
+            //System.err.println(" Didnt find lets see the child  "+ child);
+            //String desChild = getDescription(child);
+            String desChild = getPropertyValueFromPartName(child, "text");
+            if(!text.contains(desChild))
+                text += " " + desChild;
+            if(text != "" && text.charAt(text.length()-1) != '.')
+                text += ". ";
+                /*if (text == "") {
+                    text = getPropertyValueFromPartName(child, "label"); //child label
+                }
+                if (text != "") {
+                    break;
+                }*/
+        }
 
 
         return text.trim();

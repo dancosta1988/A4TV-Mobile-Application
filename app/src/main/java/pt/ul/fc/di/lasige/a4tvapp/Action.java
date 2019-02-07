@@ -21,6 +21,7 @@ public class Action {
     public static final String LEFT = "left";
     public static final String RIGHT = "right";
     public static final String OK = "ok";
+    public static final String BACK = "back";
     public static final String BEGIN_TUTORIAL = "begin_tutorial";
     public static final String CHECK_USER_EVENTS = "connect";
     public static final String CURRENT_BLOCK_INFO = "connect";
@@ -33,13 +34,14 @@ public class Action {
     public String _block_type;
     public String _block_orientation;
     public String _item_index;
+    public String _item_name;
     public String _modality;
     public String _current_level;
     public String _interaction_mode;
     public String _date;
 
     // constructor
-    public Action(String _id, String _user_id, String _description, String _block_type, String _block_orientation, String _item_index, String _modality, String _current_level, String _interaction_mode, String _date){
+    public Action(String _id, String _user_id, String _description, String _block_type, String _block_orientation, String _item_index, String _item_name, String _modality, String _current_level, String _interaction_mode, String _date){
 
             this._id = _id;
             this._user_id = _user_id;
@@ -47,6 +49,7 @@ public class Action {
             this._block_orientation = _block_orientation;
             this._block_type = _block_type;
             this._item_index = _item_index;
+            this._item_name = _item_name;
             this._modality = _modality;
             this._current_level = _current_level;
             this._interaction_mode = _interaction_mode;
@@ -55,7 +58,7 @@ public class Action {
     }
 
     // constructor
-    public Action(String _description, String _user_id, String _block_type, String _block_orientation, String _item_index, String _modality, String _current_level, String _interaction_mode){
+    public Action(String _description, String _user_id, String _block_type, String _block_orientation, String _item_index, String _item_name, String _modality, String _current_level, String _interaction_mode){
 
         Calendar c = Calendar.getInstance();
         SimpleDateFormat dateformat = new SimpleDateFormat("dMyyyyhhmmss");
@@ -67,6 +70,7 @@ public class Action {
         this._block_orientation = _block_orientation;
         this._block_type = _block_type;
         this._item_index = _item_index;
+        this._item_name = _item_name;
         this._modality = _modality;
         this._current_level = _current_level;
         this._interaction_mode = _interaction_mode;
@@ -120,6 +124,9 @@ public class Action {
 
     //getting item index
     public  String getItemIndex(){ return this._item_index; }
+
+    //getting item index
+    public  String getItemName(){ return this._item_name; }
 
 }
 

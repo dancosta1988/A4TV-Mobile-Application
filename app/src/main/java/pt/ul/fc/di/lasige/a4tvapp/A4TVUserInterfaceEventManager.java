@@ -50,6 +50,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     private static final String ACTION_BLOCK_TYPE = "block_type";
     private static final String ACTION_BLOCK_ORIENTATION = "block_orientation";
     private static final String ACTION_ITEM_INDEX = "item_index";
+    private static final String ACTION_ITEM_NAME = "item_name";
     private static final String ACTION_DATE = "DATE";
     
     //user options table name
@@ -113,7 +114,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String CREATE_ACTIONS_TABLE = "CREATE TABLE " + TABLE_ACTIONS + "("
                 + ACTION_ID + " TEXT PRIMARY KEY," + ACTION_USER_ID + " TEXT,"+ ACTION_DESCRIPTION + " TEXT," + ACTION_BLOCK_TYPE + " TEXT," + ACTION_BLOCK_ORIENTATION + " TEXT," + ACTION_ITEM_INDEX + " TEXT,"
-                + ACTION_MODALITY + " TEXT, " + ACTION_CURRENT_LEVEL + " TEXT," + ACTION_INTERACTION_MODE + " TEXT," + ACTION_DATE + " DATE )";
+                + ACTION_ITEM_NAME + " TEXT,"+ ACTION_MODALITY + " TEXT, " + ACTION_CURRENT_LEVEL + " TEXT," + ACTION_INTERACTION_MODE + " TEXT," + ACTION_DATE + " DATE )";
         db.execSQL(CREATE_ACTIONS_TABLE);
 
         String CREATE_USER_TABLE = "CREATE TABLE " + TABLE_USER_OPTIONS + "("
@@ -236,7 +237,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     }
 
     // Adding new action
-    public Action addAction(String description, String block_type, String block_orientation, String item_index, String modality, String current_level, String interaction_mode) {
+    public Action addAction(String description, String block_type, String block_orientation, String item_index, String item_name, String modality, String current_level, String interaction_mode) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         Date date = new Date();
@@ -256,6 +257,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         values.put(ACTION_BLOCK_TYPE, block_type);
         values.put(ACTION_BLOCK_ORIENTATION, block_orientation);
         values.put(ACTION_ITEM_INDEX, item_index);
+        values.put(ACTION_ITEM_NAME, item_name);
         values.put(ACTION_MODALITY, modality);
         values.put(ACTION_CURRENT_LEVEL, current_level);
         values.put(ACTION_INTERACTION_MODE, interaction_mode);
@@ -279,7 +281,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         }
 
         lastAction = description;
-        return new Action(_id, currentUserID, description, block_type, block_orientation, item_index, modality, current_level, interaction_mode, datetime);
+        return new Action(_id, currentUserID, description, block_type, block_orientation, item_index, item_name, modality, current_level, interaction_mode, datetime);
     }
 
     /*// Getting single contact
@@ -310,7 +312,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
-                Action action = new Action(cursor.getString(0), cursor.getString(1), cursor.getString(2),cursor.getString(3),cursor.getString(4), cursor.getString(5), cursor.getString(6),cursor.getString(7),cursor.getString(8),cursor.getString(9));
+                Action action = new Action(cursor.getString(0), cursor.getString(1), cursor.getString(2),cursor.getString(3),cursor.getString(4), cursor.getString(5), cursor.getString(6),cursor.getString(7),cursor.getString(8),cursor.getString(9),cursor.getString(10));
                 // Adding contact to list
                 actionList.add(action);
             } while (cursor.moveToNext());
@@ -346,7 +348,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
-                Action action = new Action(cursor.getString(0), cursor.getString(1), cursor.getString(2),cursor.getString(3),cursor.getString(4), cursor.getString(5), cursor.getString(6),cursor.getString(7),cursor.getString(8),cursor.getString(9));
+                Action action = new Action(cursor.getString(0), cursor.getString(1), cursor.getString(2),cursor.getString(3),cursor.getString(4), cursor.getString(5), cursor.getString(6),cursor.getString(7),cursor.getString(8),cursor.getString(9),cursor.getString(10));
                 // Adding contact to list
                 actionList.add(action);
             } while (cursor.moveToNext());
@@ -368,7 +370,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
-                Action action = new Action(cursor.getString(0), cursor.getString(1), cursor.getString(2),cursor.getString(3),cursor.getString(4), cursor.getString(5), cursor.getString(6),cursor.getString(7),cursor.getString(8),cursor.getString(9));
+                Action action = new Action(cursor.getString(0), cursor.getString(1), cursor.getString(2),cursor.getString(3),cursor.getString(4), cursor.getString(5), cursor.getString(6),cursor.getString(7),cursor.getString(8),cursor.getString(9),cursor.getString(10));
                 // Adding contact to list
                 actionList.add(action);
             } while (cursor.moveToNext());
@@ -414,7 +416,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
-                Action action = new Action(cursor.getString(0), cursor.getString(1), cursor.getString(2),cursor.getString(3),cursor.getString(4), cursor.getString(5), cursor.getString(6),cursor.getString(7),cursor.getString(8),cursor.getString(9));
+                Action action = new Action(cursor.getString(0), cursor.getString(1), cursor.getString(2),cursor.getString(3),cursor.getString(4), cursor.getString(5), cursor.getString(6),cursor.getString(7),cursor.getString(8),cursor.getString(9),cursor.getString(10));
                 // Adding contact to list
                 actionList.add(action);
             } while (cursor.moveToNext());
@@ -456,7 +458,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
             actionsList = getAllActions();
             for (Action a : actionsList) {
                 //System.err.println( "id: " + a._id + " desc: " + a._description + " interaction mode: " + a._interaction_mode + " level: " + a._current_level + " modality: " + a._modality + " date: " + a._date);
-                writer.write(a._id + "," + a._description + "," + a._block_type + "," + a._block_orientation + "," + a._item_index + "," + a._interaction_mode + "," + a._current_level + "," + a._modality + "," + a._date);
+                writer.write(a._id + "," + a._description + "," + a._block_type + "," + a._block_orientation + "," + a._item_index + "," + a._item_name + "," + a._interaction_mode + "," + a._current_level + "," + a._modality + "," + a._date);
                 writer.newLine();
             }
             System.err.println( "Status: Successful");
