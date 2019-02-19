@@ -65,17 +65,44 @@ public class UIMLParser {
 
 
         ArrayList<String> childs = getChildPartsWithId(id);
-        // System.err.println(" Didnt find! Has childs? " + childs.size());
+        //System.err.println(" Didnt find! Has childs? " + childs.size());
         for (String child : childs) {
             //text = getPropertyValueFromPartName(child, "text");//child description
             //recursion
-            //System.err.println(" Didnt find lets see the child  "+ child);
+
             //String desChild = getDescription(child);
             String desChild = getPropertyValueFromPartName(child, "text");
+            //System.err.println(" Didnt find lets see the child  "+ child + " text: " + desChild);
             if(!text.contains(desChild))
                 text += " " + desChild;
-            if(text != "" && text.charAt(text.length()-1) != '.')
+            if(text.compareTo("") != 0 && text.charAt(text.length()-1) != '.')
                 text += ". ";
+            //System.err.println(" Text:" + text);
+
+            if(text.trim().compareTo(".") == 0 || text.trim().compareTo("") == 0){
+                //System.err.println("Did not find description in childs going to grandchilds");
+                ArrayList<String> gchilds = getChildPartsWithId(child);
+                for (String gchild : gchilds) {
+                    desChild = getPropertyValueFromPartName(gchild, "text");
+                    if(!text.contains(desChild))
+                        text += " " + desChild;
+                    if(text.compareTo("") != 0 && text.charAt(text.length()-1) != '.')
+                        text += ". ";
+
+                    if(text.trim().compareTo(".") == 0 || text.trim().compareTo("") == 0){
+                        //System.err.println("Did not find description in childs going to grandchilds");
+                        ArrayList<String> ggchilds = getChildPartsWithId(gchild);
+                        for (String ggchild : ggchilds) {
+                            desChild = getPropertyValueFromPartName(ggchild, "text");
+                            if(!text.contains(desChild))
+                                text += " " + desChild;
+                            if(text.compareTo("") != 0 && text.charAt(text.length()-1) != '.')
+                                text += ". ";
+                        }
+                    }
+                }
+            }
+
                 /*if (text == "") {
                     text = getPropertyValueFromPartName(child, "label"); //child label
                 }
