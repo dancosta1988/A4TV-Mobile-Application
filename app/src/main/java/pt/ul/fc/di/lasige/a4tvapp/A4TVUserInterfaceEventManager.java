@@ -500,29 +500,29 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
                     if(valueP != ""){
                         System.err.println( "Property: " + nameP + " = " + valueP);
                         if(nameP.compareTo("IRRELEVANT_ACTIONS_THRESHOLD") == 0)
-                            IRRELEVANT_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                            IRRELEVANT_ACTIONS_THRESHOLD = Integer.parseInt(valueP);
                         else if(nameP.compareTo("SHORT_IRRELEVANT_ACTIONS_THRESHOLD") == 0)
-                            SHORT_IRRELEVANT_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                            SHORT_IRRELEVANT_ACTIONS_THRESHOLD = Integer.parseInt(valueP);
                         else if(nameP.compareTo("REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD") == 0)
-                            REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                            REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD = Integer.parseInt(valueP);
                         else if(nameP.compareTo("REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD") == 0)
-                            REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                            REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD = Integer.parseInt(valueP);
                         else if(nameP.compareTo("REOCCURENCE_SPEECH_ACTIONS_THRESHOLD") == 0)
-                            REOCCURENCE_SPEECH_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                            REOCCURENCE_SPEECH_ACTIONS_THRESHOLD = Integer.parseInt(valueP);
                         else if(nameP.compareTo("SHORT_REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD") == 0)
-                            SHORT_REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                            SHORT_REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD = Integer.parseInt(valueP);
                         else if(nameP.compareTo("SHORT_REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD") == 0)
-                            SHORT_REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                            SHORT_REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD = Integer.parseInt(valueP);
                         else if(nameP.compareTo("SHORT_REOCCURENCE_SPEECH_ACTIONS_THRESHOLD") == 0)
-                            SHORT_REOCCURENCE_SPEECH_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                            SHORT_REOCCURENCE_SPEECH_ACTIONS_THRESHOLD = Integer.parseInt(valueP);
                         else if(nameP.compareTo("QUICK_SCROLL_ACTIONS_THRESHOLD") == 0)
-                            QUICK_SCROLL_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                            QUICK_SCROLL_ACTIONS_THRESHOLD = Integer.parseInt(valueP);
                         else if(nameP.compareTo("LOST_AWARENESS_ACTIONS_THRESHOLD") == 0)
-                            LOST_AWARENESS_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                            LOST_AWARENESS_ACTIONS_THRESHOLD = Integer.parseInt(valueP);
                         else if(nameP.compareTo("LONG_CHECK_ACTIONS_THRESHOLD") == 0)
-                            LONG_CHECK_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                            LONG_CHECK_ACTIONS_THRESHOLD = Integer.parseInt(valueP);
                         else if(nameP.compareTo("SHORT_CHECK_ACTIONS_THRESHOLD") == 0)
-                            SHORT_CHECK_ACTIONS_THRESHOLD = Integer.getInteger(valueP);
+                            SHORT_CHECK_ACTIONS_THRESHOLD = Integer.parseInt(valueP);
                     }
                 }
             }
@@ -530,6 +530,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         }catch(Exception e){
             System.err.println( "Status: Failed to read config file. Report: ");
             System.err.println( e.getMessage());
+            e.printStackTrace();
         }
 
     }
@@ -561,6 +562,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
             if(i >= LONG_CHECK_ACTIONS_THRESHOLD)
                 needCheck = true;
         }
+        System.err.println("Checking time for pattern analysis. Number of actions: " + i + ". Needs check: " + needCheck);
         return needCheck;
     }
 

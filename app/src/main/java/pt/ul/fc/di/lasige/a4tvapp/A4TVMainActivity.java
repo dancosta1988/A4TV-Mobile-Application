@@ -622,6 +622,8 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
             }
 
             getUserPreferences();
+        }else{
+            System.err.println("No patterns found no need for adaptations!");
         }
 
     }
