@@ -438,7 +438,9 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
             //start ui event manager
             userInterfaceEventManager = new A4TVUserInterfaceEventManager(this);
             userInterfaceEventManager.readConfigFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() +"/A4TV/", "a4tv_config.xml");
-
+            SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+            String user = sharedPrefs.getString("user_id", "root");
+            userInterfaceEventManager.setCurrentUserID(user);
             //start dialog manager
             dialogs = new A4TVAdaptationAndTutorialDialogs(this);
 
@@ -810,8 +812,9 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
         getUserPreferences();
 
         if(firstTime) {
-
-            mobileClient = new A4TVMobileClient(ipAdd, 4444, useTTS, readingMode, this);
+            SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+            String user = sharedPrefs.getString("user_id", "root");
+            mobileClient = new A4TVMobileClient(ipAdd, 4444, useTTS, readingMode, this, user);
             updateMobileClientWithUserPreferences();
 
             if(useTTS) {

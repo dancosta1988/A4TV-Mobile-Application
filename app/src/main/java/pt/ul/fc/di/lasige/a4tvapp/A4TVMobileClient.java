@@ -534,7 +534,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                     "</interface>" +
                     "</uiml>"};
 
-    public A4TVMobileClient(String hostName, int portNumber, boolean useTTS,int mode, Context context) {
+    public A4TVMobileClient(String hostName, int portNumber, boolean useTTS,int mode, Context context, String user) {
         this.hostName = hostName;
         this.portNumber = portNumber;
         this.useTTS = useTTS;
@@ -547,6 +547,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
         lastSentence = new ArrayList<String>();
         mp = MediaPlayer.create(context, R.raw.error_earcon);
         userInterfaceEventManager = new A4TVUserInterfaceEventManager(context);
+        userInterfaceEventManager.setCurrentUserID(user);
         states = new ArrayList<TVApplicationState>();
         videoVolume = -1;
     }
