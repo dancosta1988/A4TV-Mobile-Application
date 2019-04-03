@@ -537,7 +537,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
                     if (!userInterfaceEventManager.hasUserDoneTutorial()) {
                         //run tutorial
                         dialogs.startTutorial();
-                        userInterfaceEventManager.addAction("begin_tutorial", "-", "-", "-", "-", "none", readingMode + "." + focusMode, interactMode + "");
+                        userInterfaceEventManager.addAction(Action.BEGIN_TUTORIAL, "-", "-", "-", "-", "none", readingMode + "." + focusMode, interactMode + "");
                         getUserPreferences();
                         storeUserPreferences();
                     }
@@ -564,7 +564,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void checkForAccessibilityIssues(){
-        userInterfaceEventManager.addAction("check_user_events", "-", "-", "-", "-", "-", readingMode + "." + focusMode, interactMode + "");
+        userInterfaceEventManager.addAction(Action.CHECK_USER_EVENTS, "-", "-", "-", "-", "-", readingMode + "." + focusMode, interactMode + "");
 
         if(userInterfaceEventManager.isUserExperiencedWithVerbose() && readingMode == A4TVMobileClient.VERBOSE) {
             dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que o utilizador já tem alguma experiência," +

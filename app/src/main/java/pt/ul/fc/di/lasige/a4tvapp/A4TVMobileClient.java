@@ -697,7 +697,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                         ArrayList<Action> actions = new ArrayList<Action>();
                         actions.addAll(states.get(currentStateIndex).getActions());
                         for (Action a : actions) {
-                            userInterfaceEventManager.addAction("current_block_info", a._block_type, a._block_orientation, a._item_index, a._item_name,"-", a._current_level, a._interaction_mode);
+                            userInterfaceEventManager.addAction(Action.CURRENT_BLOCK_INFO, a._block_type, a._block_orientation, a._item_index, a._item_name,"-", a._current_level, a._interaction_mode);
                         }
 
 
@@ -846,7 +846,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                     ArrayList<Action> actions = new ArrayList<Action>();
                     actions.addAll(states.get(currentStateIndex).getActions());
                     for (Action a : actions) {
-                        userInterfaceEventManager.addAction("current_block_info", a._block_type, a._block_orientation, a._item_index, a._item_name, "-", a._current_level, a._interaction_mode);
+                        userInterfaceEventManager.addAction(Action.CURRENT_BLOCK_INFO, a._block_type, a._block_orientation, a._item_index, a._item_name, "-", a._current_level, a._interaction_mode);
                     }
                 }
 
@@ -968,7 +968,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                     */
 
                         if(!userCommand) {
-                            Action action = userInterfaceEventManager.addAction("current_block_info", block_type, orientation, index + "/" + count, elemId.get(temp) , "-", readingMode + "." + focusMode, interactionMode + "");
+                            Action action = userInterfaceEventManager.addAction(Action.CURRENT_BLOCK_INFO, block_type, orientation, index + "/" + count, elemId.get(temp) , "-", readingMode + "." + focusMode, interactionMode + "");
                             states.get(currentStateIndex).addAction(action);
                         }
 
