@@ -24,7 +24,7 @@ public class Action {
     public static final String BACK = "back";
     public static final String BEGIN_TUTORIAL = "begin_tutorial";
     public static final String CHECK_USER_EVENTS = "check_user_events";
-    public static final String CURRENT_BLOCK_INFO = "connect";
+    public static final String CURRENT_BLOCK_INFO = "current_block_info";
     
     
     //public variables
