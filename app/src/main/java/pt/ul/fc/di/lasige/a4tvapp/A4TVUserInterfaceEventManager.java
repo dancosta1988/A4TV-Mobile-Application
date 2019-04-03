@@ -554,15 +554,17 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         List<Action> actions = getAllActions();
         boolean needCheck = false;
         int i = actions.size()-1;
+        int count = 0;
         if(actions.size() > 0) {
             while ( i >= 0 && actions.get(i).getDescription().compareTo(Action.CHECK_USER_EVENTS) != 0)
             {
                 i--;
+                count++;
             }
-            if(i >= LONG_CHECK_ACTIONS_THRESHOLD)
+            if(count >= LONG_CHECK_ACTIONS_THRESHOLD)
                 needCheck = true;
         }
-        System.err.println("Checking time for pattern analysis. Number of actions: " + i + ". Needs check: " + needCheck);
+        System.err.println("Checking time for pattern analysis. Number of actions: " + count + ". Needs check: " + needCheck);
         return needCheck;
     }
 
