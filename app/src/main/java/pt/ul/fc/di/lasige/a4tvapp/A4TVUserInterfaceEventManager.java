@@ -322,6 +322,18 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         return actionList;
     }
 
+    public void removeNulls(String user){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(ACTION_USER_ID, user);
+
+        // Inserting Row
+        int result = db.update(TABLE_ACTIONS, values, ACTION_USER_ID +" IS NULL", null );
+        System.err.println( "Updating User: " + user);
+        db.close(); // Closing database connection
+    }
+
 
     // Getting actions Count
     public int getAllActionsCount() {
@@ -616,33 +628,33 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
     private boolean getIrrelanvActionsPattern(){
         int count = 0;
-        Long currentMili = new Date().getTime();
-
-
+        String[] skip = new String[]{"full-screen-button-next", "full-screen-button-pause", "full-screen-button-prev", "full-screen-progress-indicator"};
         List<Action> actions = getSpecificActions(Action.CURRENT_BLOCK_INFO);
-        for (int i = 0; i < actions.size()-4; i+=2) {
-            try {
+        if(actions.size() > LONG_CHECK_ACTIONS_THRESHOLD)
+            actions = actions.subList(actions.size()-LONG_CHECK_ACTIONS_THRESHOLD-1,actions.size()-1);
+        int i = 0;
+        for (i = 0; i < actions.size()-4;) {
 
-
-                String time1 = actions.get(i).getDate();
-                SimpleDateFormat sdf1 = new java.text.SimpleDateFormat("d-M-yyyy hh:mm:ss aa");
-                sdf1.parse(time1);
-                long diff = currentMili - sdf1.getCalendar().getTimeInMillis();
-                if (diff <= 604800000) {
-                    String index_1_1 = actions.get(i).getItemIndex();
-                    String index_2_1 = actions.get(i + 1).getItemIndex();
-                    String index_1_2 = actions.get(i + 2).getItemIndex();
-                    String index_2_2 = actions.get(i + 3).getItemIndex();
-                    if (index_1_1.compareTo(index_1_2) == 0 && index_2_1.compareTo(index_2_2) == 0) {
-                        count++;
-                    }
+                String index_1_1 = actions.get(i).getItemName();
+                String index_2_1 = actions.get(i + 1).getItemName();
+                String index_1_2 = actions.get(i + 2).getItemName();
+                String index_2_2 = actions.get(i + 3).getItemName();
+                if ((index_1_1.compareTo(index_1_2) == 0 && index_2_1.compareTo(index_2_2) == 0)
+                        && (index_1_1.compareTo(index_2_1) != 0 || index_1_2.compareTo(index_2_2) != 0 )) {
+                    count++;
+                    i+=4;
+                    System.out.println("Irrelavant action found: 1. " + index_1_1 + " 2. " + index_1_2 + " | 1. " + index_2_1+" 2. " + index_2_2);
+                }else if(index_1_1.compareTo(index_2_1) == 0 &&
+                        (index_1_1.compareTo(skip[0]) != 0 && index_1_1.compareTo(skip[1]) != 0 &&
+                                index_1_1.compareTo(skip[2]) != 0 && index_1_1.compareTo(skip[3]) != 0)){
+                    count++;
+                    i++;
+                    System.out.println("Irrelavant action found: 1. " + index_1_1 + " 2. " + index_2_1);
+                }else{
+                    i++;
                 }
-
-            }catch(Exception e){
-
-            }
         }
-
+        System.out.println("Irrelavant actions count: " + count + " from total: " + i);
 
         return count >= IRRELEVANT_ACTIONS_THRESHOLD;
     }
@@ -686,18 +698,13 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         List<Action> actions = getActionsExcept(Action.CURRENT_BLOCK_INFO);
         if(actions.size() > lastNumberofActions)
             actions = actions.subList(actions.size()-lastNumberofActions-1,actions.size()-1);
-        System.out.println(actions.size());
+        //System.out.println(actions.size());
         for (int i = 0; i < actions.size() - 1; i++) {
-            try {
-                /*String time1 = actions.get(i).getDate();
-                SimpleDateFormat sdf1 = new java.text.SimpleDateFormat("d-M-yyyy hh:mm:ss aa");
-                sdf1.parse(time1);
-                long diff = currentMili - sdf1.getCalendar().getTimeInMillis();
-                if (diff <= 604800000) { //3600000*/
-                    //System.out.println(actions.get(i).getDescription());
+
+                    //System.out.println(i + " " + actions.get(i).getDescription());
                     if (actions.get(i).getDescription().compareTo(elementaryAction) == 0 &&
                             (actions.get(i + 1).getDescription().compareTo(elementaryAction) == 0
-                                    || actions.get(i + 1).getDescription().compareTo(elementaryAction) == 0)) {
+                                    || actions.get(i + 2).getDescription().compareTo(elementaryAction) == 0)) {
 
                         countConsec++;
 
@@ -710,9 +717,6 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
                         countConsec = 0;
                     }
 
-            }catch (Exception e){
-
-            }
         }
 
         System.out.println("Reoccurences for " + elementaryAction + " count: " + count);
@@ -745,7 +749,8 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         int countConsec = 0;
 
         List<Action> actions = getActionsExcept(Action.CURRENT_BLOCK_INFO);
-
+        if(actions.size() > LONG_CHECK_ACTIONS_THRESHOLD)
+            actions = actions.subList(actions.size()-LONG_CHECK_ACTIONS_THRESHOLD-1,actions.size()-1);
         for (int i = 0; i < actions.size() - 1; i++) {
 
             String time1 = actions.get(i).getDate();

@@ -441,6 +441,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
             SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
             String user = sharedPrefs.getString("user_id", "root");
             userInterfaceEventManager.setCurrentUserID(user);
+
             //start dialog manager
             dialogs = new A4TVAdaptationAndTutorialDialogs(this);
 
@@ -564,6 +565,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void checkForAccessibilityIssues(){
+
         userInterfaceEventManager.addAction(Action.CHECK_USER_EVENTS, "-", "-", "-", "-", "-", readingMode + "." + focusMode, interactMode + "");
 
         if(userInterfaceEventManager.isUserExperiencedWithVerbose() && readingMode == A4TVMobileClient.VERBOSE) {
@@ -576,6 +578,8 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
         boolean reLocalize = userInterfaceEventManager.findReOccurencePattern(Action.LOCALIZE, true);
         boolean reReadScreen = userInterfaceEventManager.findReOccurencePattern(Action.READ_SCREEN, true);
         boolean quickScroll = userInterfaceEventManager.findQuickVerticalnavigationPattern();
+
+        System.err.println( "patterns found. IrActions: " + irActions + " reLocalize: " + reLocalize + " reRead: " + reReadScreen + " quickS:" + quickScroll);
 
         String dialogText = "A aplicação detectou que ";
         if(irActions){
