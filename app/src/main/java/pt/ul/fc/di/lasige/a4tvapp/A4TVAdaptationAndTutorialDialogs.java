@@ -36,8 +36,8 @@ public class A4TVAdaptationAndTutorialDialogs {
             public void onClick(DialogInterface dialog, int which) {
 
             }
-        });
-        builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+        })
+        .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 // accepted
                 //editor.putString("reading_preference", "1");
@@ -50,7 +50,7 @@ public class A4TVAdaptationAndTutorialDialogs {
                 interactMode = Integer.parseInt(sharedPrefs.getString("interact_preference", "1"));
                 focusMode = Integer.parseInt(sharedPrefs.getString("focus_preference", "1"));*/
                 }
-        });
+        }).show();
 
 
                 return builder;
