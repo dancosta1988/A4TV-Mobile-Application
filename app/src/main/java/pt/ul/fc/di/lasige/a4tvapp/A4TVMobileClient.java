@@ -710,6 +710,7 @@ public class A4TVMobileClient extends Activity implements Runnable/*extends Asyn
                                 }else{
                                     readFocusedElements(false);
                                 }
+                                userInterfaceEventManager.addAction(Action.SHORT_TERM_ADAPTATION_APPLIED, "verbose_temp", "-", "-", "-", "-", readingMode + "." + focusMode, interactionMode + "");
                             }else {
                                 mp.start();
                             }

@@ -25,6 +25,8 @@ public class Action {
     public static final String BEGIN_TUTORIAL = "begin_tutorial";
     public static final String CHECK_USER_EVENTS = "check_user_events";
     public static final String CURRENT_BLOCK_INFO = "current_block_info";
+    public static final String LONG_TERM_ADAPTATION_APPLIED = "long_term_adaptatation_applied";
+    public static final String SHORT_TERM_ADAPTATION_APPLIED = "short_term_adaptatation_applied";
     
     
     //public variables

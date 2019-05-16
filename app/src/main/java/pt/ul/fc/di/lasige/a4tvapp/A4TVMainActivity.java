@@ -17,6 +17,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Menu;
@@ -627,8 +628,17 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
             }
 
             getUserPreferences();
+            userInterfaceEventManager.addAction(Action.LONG_TERM_ADAPTATION_APPLIED, "-", "-", "-", "-", "-", readingMode + "." + focusMode, interactMode + "");
         }else{
-            System.err.println("No patterns found no need for adaptations!");
+            System.err.println("No patterns found, suggest concise if verbose");
+
+            if(readingMode == A4TVMobileClient.VERBOSE){
+                dialogText = "A aplicação não detectou nenhuma dificuldade na utilização,";
+                dialogs.createAdaptationDialog("Sugestão", dialogText +
+                        " deseja passar para o modo conciso?", "reading_preference", A4TVMobileClient.CONCISE + "");
+                getUserPreferences();
+                userInterfaceEventManager.addAction(Action.LONG_TERM_ADAPTATION_APPLIED, "-", "-", "-", "-", "-", readingMode + "." + focusMode, interactMode + "");
+            }
         }
 
     }
@@ -663,10 +673,11 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void interrupt(){
-        if(mobileClient != null && mobileClient.isConnected())
+        if(mobileClient != null && mobileClient.isConnected()) {
             myVib.vibrate(200);
-            //mobileClient.stopSpeech();
-            mobileClient.interruptSpeech();
+            mobileClient.stopSpeech();
+            //mobileClient.interruptSpeech();
+        }
     }
 
     private void sendKeyboardInstruction(int keycode){
@@ -993,6 +1004,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
             if(userInterfaceEventManager.findReOccurencePattern(Action.START_SPEECH, false)){
                 mobileClient.setVideoVolume(0.2);
                 sendKeyboardInstruction(-1);
+                userInterfaceEventManager.addAction(Action.SHORT_TERM_ADAPTATION_APPLIED, "volume_down", "-", "-", "-", "-", readingMode + "." + focusMode, interactMode + "");
             }
         }
         public void onBeginningOfSpeech()
