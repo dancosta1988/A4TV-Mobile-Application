@@ -567,19 +567,20 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
 
     private void checkForAccessibilityIssues(){
 
-        userInterfaceEventManager.addAction(Action.CHECK_USER_EVENTS, "-", "-", "-", "-", "-", readingMode + "." + focusMode, interactMode + "");
 
-        if(userInterfaceEventManager.isUserExperiencedWithVerbose() && readingMode == A4TVMobileClient.VERBOSE) {
+
+        /*if(userInterfaceEventManager.isUserExperiencedWithVerbose() && readingMode == A4TVMobileClient.VERBOSE) {
             dialogs.createAdaptationDialog("Sugestão", "A aplicação detectou que o utilizador já tem alguma experiência," +
                     " deseja passar para o modo conciso?", "reading_preference", "2").show();
             getUserPreferences();
-        }
+        }*/
 
         boolean irActions = userInterfaceEventManager.findIrrelevantActionsPattern(true);
         boolean reLocalize = userInterfaceEventManager.findReOccurencePattern(Action.LOCALIZE, true);
         boolean reReadScreen = userInterfaceEventManager.findReOccurencePattern(Action.READ_SCREEN, true);
         boolean quickScroll = userInterfaceEventManager.findQuickVerticalnavigationPattern();
 
+        userInterfaceEventManager.addAction(Action.CHECK_USER_EVENTS, "IrActions_" + irActions + "_reLocalize_" + reLocalize + "_reRead_" + reReadScreen + "_quickS_" + quickScroll, "-", "-", "-", "-", readingMode + "." + focusMode, interactMode + "");
         System.err.println( "patterns found. IrActions: " + irActions + " reLocalize: " + reLocalize + " reRead: " + reReadScreen + " quickS:" + quickScroll);
 
         String dialogText = "A aplicação detectou que ";
