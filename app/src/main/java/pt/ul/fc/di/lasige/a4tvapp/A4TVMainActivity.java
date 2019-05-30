@@ -1,9 +1,14 @@
 package pt.ul.fc.di.lasige.a4tvapp;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
@@ -40,7 +45,7 @@ import com.thalmic.myo.XDirection;
 import java.util.ArrayList;
 import java.util.List;
 
-public class A4TVMainActivity extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener {
+public class A4TVMainActivity extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener, SensorEventListener {
     private final int CHECK_CODE = 0x1;
     private final int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 101;
     private final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 102;
@@ -72,6 +77,10 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
     private View touch_view;
     private View.OnTouchListener touch;
     private Vibrator myVib;
+
+    private SensorManager mSensorManager;
+    private Sensor mProximity;
+    private static final int SENSOR_SENSITIVITY = 4;
 
     private static Button btnUP;
     private static Button btnDOWN;
@@ -388,6 +397,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
 
                 public void holdingDown() {
                     System.err.println("Holding down");
+                    interrupt();
                     if (recognizerIntent != null) {
                         userInterfaceEventManager.addAction("start speech", "-", "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
                         sr.startListening(recognizerIntent);
@@ -396,10 +406,11 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
 
                 public void onSingleTap() {
                     System.err.println("SingleTap");
-                    if (recognizerIntent != null) {
+                    interrupt();
+                    /*if (recognizerIntent != null) {
                         userInterfaceEventManager.addAction(Action.LOCALIZE, "-", "-", "-", "-", "screen_gesture", readingMode + "." + focusMode, interactMode + "");
                         localize();
-                    }
+                    }*/
                 }
 
                 public void onScrollDown() {
@@ -434,6 +445,9 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
                 }
             });
 
+            //proximity sensor
+            mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+            mProximity = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
 
             checkTTS();
             //start ui event manager
@@ -461,6 +475,9 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onResume(){
         super.onResume();
+
+        mSensorManager.registerListener(this, mProximity, SensorManager.SENSOR_DELAY_NORMAL);
+
         System.err.println("onResume");
        /* if (firstTime){
             System.err.println ("it's the first time");
@@ -631,7 +648,7 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
             getUserPreferences();
             userInterfaceEventManager.addAction(Action.LONG_TERM_ADAPTATION_APPLIED, "-", "-", "-", "-", "-", readingMode + "." + focusMode, interactMode + "");
         }else{
-            System.err.println("No patterns found, suggest concise if verbose");
+            System.err.println("No patterns found, suggest concise if verbose....sdad");
 
             if(readingMode == A4TVMobileClient.VERBOSE){
                 dialogText = "A aplicação não detectou nenhuma dificuldade na utilização,";
@@ -995,6 +1012,25 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
 
         }
         //return true;
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
+            if (event.values[0] >= -SENSOR_SENSITIVITY && event.values[0] <= SENSOR_SENSITIVITY) {
+                //near
+                interrupt();
+                //Toast.makeText(getApplicationContext(), "near", Toast.LENGTH_SHORT).show();
+            } else {
+                //far
+                //Toast.makeText(getApplicationContext(), "far", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+
     }
 
     class SpeechRecognitionListener implements RecognitionListener
