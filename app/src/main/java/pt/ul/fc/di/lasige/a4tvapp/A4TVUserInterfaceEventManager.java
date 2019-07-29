@@ -82,6 +82,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     static  int LOST_AWARENESS_ACTIONS_THRESHOLD = 6;
     static  int LONG_CHECK_ACTIONS_THRESHOLD = 6685; //Average 191 actions per hour (7 days x 5 hours = 6685)
     static  int SHORT_CHECK_ACTIONS_THRESHOLD = 120;
+    static int CONSEC_COUNT = 1;
 
 
     private int NumberOfErrors = 0;
@@ -89,6 +90,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     private String lastIndex = "";
     private int startSpeechInRow = 1;
     private int irrelevantActionsInRow = 0;
+    private int actionsToCheck;
     private String currentUserID;
 
 
@@ -567,17 +569,36 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         boolean needCheck = false;
         int i = actions.size()-1;
         int count = 0;
-        if(actions.size() > 0) {
-            while ( i >= 0 && actions.get(i).getDescription().compareTo(Action.CHECK_USER_EVENTS) != 0)
-            {
-                i--;
-                count++;
+
+        try {
+            String time1 = actions.get(actions.size() - 1).getDate();
+            SimpleDateFormat sdf1 = new java.text.SimpleDateFormat("d-M-yyyy hh:mm:ss aa");
+            sdf1.parse(time1);
+            int current_day = sdf1.getCalendar().get(Calendar.DAY_OF_MONTH);
+
+
+            if(actions.size() > 0) {
+                while ( i >= 0 && actions.get(i).getDescription().compareTo(Action.CHECK_USER_EVENTS) != 0)
+                {
+                    i--;
+                    count++;
+                }
+
+                String time2 = actions.get(i).getDate();
+                SimpleDateFormat sdf2 = new java.text.SimpleDateFormat("d-M-yyyy hh:mm:ss aa");
+                sdf2.parse(time2);
+                int last_check_day = sdf2.getCalendar().get(Calendar.DAY_OF_MONTH);
+                actionsToCheck = count;
+                if(actionsToCheck >= LONG_CHECK_ACTIONS_THRESHOLD && last_check_day != current_day)
+                    needCheck = true;
             }
-            if(count >= LONG_CHECK_ACTIONS_THRESHOLD)
-                needCheck = true;
+            System.err.println("Checking time for pattern analysis. Number of actions: " + count + ". Needs check: " + needCheck);
+            return needCheck;
+
+        }catch(ParseException e){
+            System.out.println("Error parsing date: " + e.getMessage());
+            return false;
         }
-        System.err.println("Checking time for pattern analysis. Number of actions: " + count + ". Needs check: " + needCheck);
-        return needCheck;
     }
 
     //User is always using the talkback modality
@@ -630,8 +651,8 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         int count = 0;
         String[] skip = new String[]{"full-screen-button-next", "full-screen-button-pause", "full-screen-button-prev", "full-screen-progress-indicator"};
         List<Action> actions = getSpecificActions(Action.CURRENT_BLOCK_INFO);
-        if(actions.size() > LONG_CHECK_ACTIONS_THRESHOLD)
-            actions = actions.subList(actions.size()-LONG_CHECK_ACTIONS_THRESHOLD-1,actions.size()-1);
+        if(actions.size() > actionsToCheck)
+            actions = actions.subList(actions.size()-actionsToCheck-1,actions.size()-1);
         int i = 0;
         for (i = 0; i < actions.size()-4;) {
 
@@ -656,7 +677,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         }
         System.out.println("Irrelavant actions count: " + count + " from total: " + i);
 
-        return count >= IRRELEVANT_ACTIONS_THRESHOLD;
+        return count >= ((IRRELEVANT_ACTIONS_THRESHOLD * actionsToCheck) / LONG_CHECK_ACTIONS_THRESHOLD);
     }
 
     public boolean findReOccurencePattern(String elementaryAction, boolean longTerm) {
@@ -664,13 +685,13 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         if(longTerm) {
             switch (elementaryAction) {
                 case Action.LOCALIZE:
-                    found = getReOccurencePattern(elementaryAction, LONG_CHECK_ACTIONS_THRESHOLD) >= REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD;
+                    found = getReOccurencePattern(elementaryAction, actionsToCheck) >= ((REOCCURENCE_LOCALIZE_ACTIONS_THRESHOLD * actionsToCheck) / LONG_CHECK_ACTIONS_THRESHOLD);
                     break;
                 case Action.READ_SCREEN:
-                    found = getReOccurencePattern(elementaryAction, LONG_CHECK_ACTIONS_THRESHOLD) >= REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD;
+                    found = getReOccurencePattern(elementaryAction, actionsToCheck) >= ((REOCCURENCE_READ_SCREEN_ACTIONS_THRESHOLD * actionsToCheck) / LONG_CHECK_ACTIONS_THRESHOLD);
                     break;
                 case Action.START_SPEECH:
-                    found = getReOccurencePattern(elementaryAction, LONG_CHECK_ACTIONS_THRESHOLD) >= REOCCURENCE_SPEECH_ACTIONS_THRESHOLD;
+                    found = getReOccurencePattern(elementaryAction, actionsToCheck) >= ((REOCCURENCE_SPEECH_ACTIONS_THRESHOLD * actionsToCheck) / LONG_CHECK_ACTIONS_THRESHOLD);
                     break;
             }
         }else{
@@ -709,7 +730,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
                         countConsec++;
 
 
-                        if (countConsec == 3) // higher consec doesnt need to count
+                        if (countConsec == CONSEC_COUNT) // higher consec doesnt need to count
                             count++;
 
 
@@ -740,7 +761,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
     }
 
     public boolean findQuickVerticalnavigationPattern(){
-        return (getQuickVerticalnavigationPattern() + getQuickHorizontalNavigationPattern()) >= QUICK_SCROLL_ACTIONS_THRESHOLD;
+        return (getQuickVerticalnavigationPattern() + getQuickHorizontalNavigationPattern()) >= ((QUICK_SCROLL_ACTIONS_THRESHOLD * actionsToCheck) / LONG_CHECK_ACTIONS_THRESHOLD);
     }
 
     //Quick Up/Down Scroll pattern means the user is searching and skimming for information
@@ -749,8 +770,8 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
         int countConsec = 0;
 
         List<Action> actions = getActionsExcept(Action.CURRENT_BLOCK_INFO);
-        if(actions.size() > LONG_CHECK_ACTIONS_THRESHOLD)
-            actions = actions.subList(actions.size()-LONG_CHECK_ACTIONS_THRESHOLD-1,actions.size()-1);
+        if(actions.size() > actionsToCheck)
+            actions = actions.subList(actions.size()-actionsToCheck-1,actions.size()-1);
         for (int i = 0; i < actions.size() - 1; i++) {
 
             String time1 = actions.get(i).getDate();
@@ -773,7 +794,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
                     countConsec++;
 
-                    if (countConsec == 3) // higher consec doesnt need to count
+                    if (countConsec == CONSEC_COUNT) // higher consec doesnt need to count
                         count++;
 
                 } else {
@@ -821,7 +842,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
                     countConsec++;
 
-                    if (countConsec == 3) // higher consec doesnt need to count
+                    if (countConsec == CONSEC_COUNT) // higher consec doesnt need to count
                         count++;
 
                 } else {
@@ -862,7 +883,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
                     countConsec++;
 
-                    if(countConsec == 3) // higher consec doesnt need to count
+                    if(countConsec == CONSEC_COUNT) // higher consec doesnt need to count
                         count++;
 
                 }else{
