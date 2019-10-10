@@ -621,8 +621,8 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
                         " deseja passar para o modo detalhado?", "reading_preference", A4TVMobileClient.VERBOSE + "");
             } else if (readingMode == A4TVMobileClient.CONCISE && quickScroll){
                 double newSpeed = (speechSpeed + 0.2);
-                if(newSpeed < 0)
-                    newSpeed = 0;
+                if(newSpeed > 1)
+                    newSpeed = 1;
                 dialogs.createAdaptationDialog("Sugestão", dialogText +
                         "deseja aumentar a velocidade de leitura?", "configure_speed", newSpeed + "");
             } else if(readingMode == A4TVMobileClient.VERBOSE && (irActions || reLocalize)){
@@ -640,9 +640,6 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
                 dialogs.createAdaptationDialog("Sugestão", dialogText +
                         " deseja diminuir a velocidade de leitura?", "configure_speed", newSpeed + "").show();
 
-            } else if(readingMode == A4TVMobileClient.VERBOSE && focusMode == A4TVMobileClient.FOCUS_MAP && quickScroll){
-                dialogs.createAdaptationDialog("Sugestão", dialogText +
-                        " deseja experimentar outra versão do modo detalhado?", "focus_preference", A4TVMobileClient.FOCUS_SIBLINGS + "");
             }
 
             getUserPreferences();
@@ -654,14 +651,14 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
                 dialogText = "A aplicação não detectou nenhuma dificuldade na utilização,";
                 dialogs.createAdaptationDialog("Sugestão", dialogText +
                         " deseja passar para o modo conciso?", "reading_preference", A4TVMobileClient.CONCISE + "");
-                getUserPreferences();
-                userInterfaceEventManager.addAction(Action.LONG_TERM_ADAPTATION_APPLIED, "-", "-", "-", "-", "-", readingMode + "." + focusMode, interactMode + "");
 
             } else if(readingMode == A4TVMobileClient.VERBOSE && focusMode == A4TVMobileClient.FOCUS_SIBLINGS){
                 dialogText = "A aplicação não detectou nenhuma dificuldade na utilização,";
                 dialogs.createAdaptationDialog("Sugestão", dialogText +
                         " deseja experimentar outra versão do modo detalhado?", "focus_preference", A4TVMobileClient.FOCUS_MAP + "");
             }
+            getUserPreferences();
+            userInterfaceEventManager.addAction(Action.LONG_TERM_ADAPTATION_APPLIED, "-", "-", "-", "-", "-", readingMode + "." + focusMode, interactMode + "");
         }
 
     }
