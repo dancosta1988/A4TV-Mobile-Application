@@ -578,7 +578,7 @@ public class A4TVUserInterfaceEventManager extends SQLiteOpenHelper {
 
 
             if(actions.size() > 0) {
-                while ( i >= 0 && actions.get(i).getDescription().compareTo(Action.CHECK_USER_EVENTS) != 0)
+                while ( i > 0 && actions.get(i).getDescription().compareTo(Action.CHECK_USER_EVENTS) != 0)
                 {
                     i--;
                     count++;

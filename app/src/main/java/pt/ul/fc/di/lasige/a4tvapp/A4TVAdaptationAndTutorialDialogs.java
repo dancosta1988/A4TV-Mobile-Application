@@ -205,11 +205,12 @@ public class A4TVAdaptationAndTutorialDialogs {
             public void onClick(DialogInterface dialog, int which) {
                 // accepted
                 String recommendation = "";
-                if(experiencedUser){
+                /*if(experiencedUser){
                     recommendation = "A aplicação recomenda usar o modo Conciso, aceita?";
                 }else{
                     recommendation = "A aplicação recomenda usar o modo Detalhado, aceita?";
-                }
+                }*/
+                recommendation = "Começará por usar o modo Detalhado.";
                 createTutorialDialog6("Modo de Feedback", "É possível apresentar a informação do que se passa no ecrã da televisão de duas maneiras. O modo detalhado apresenta-lhe " +
                         "mais contexto sobre a interface da aplicação TV, como por exemplo, todas as opções existentes no menu onde se encontra. Por outro lado o modo conciso, remove essa informação" +
                         " para uma interação mais rápida. " + recommendation);
@@ -224,13 +225,16 @@ public class A4TVAdaptationAndTutorialDialogs {
         DialogBuilder bld = new DialogBuilder();
         AlertDialog.Builder builder = bld.createDialog(context, title, message);
 
-        builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 // accepted
+                editor.putString("reading_preference", A4TVMobileClient.VERBOSE+"");
+                editor.putString("focus_preference", A4TVMobileClient.FOCUS_SIBLINGS+"");
+                editor.commit();
                 createTutorialDialogFinish("Tutorial Concluído", "Obrigado por responder a estas questões. Pode utilizar livremente a aplicação.");
             }
         })
-                .setNegativeButton("Não", new DialogInterface.OnClickListener() {
+                /*.setNegativeButton("Não", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         if(experiencedUser){
                             editor.putString("reading_preference", "1");
@@ -242,7 +246,7 @@ public class A4TVAdaptationAndTutorialDialogs {
 
                         createTutorialDialogFinish("Tutorial Concluído", "Obrigado por responder a estas questões. Pode utilizar livremente a aplicação.");
                     }
-                })
+                })*/
                 .show();
 
     }
