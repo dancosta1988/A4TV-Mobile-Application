@@ -206,9 +206,9 @@ public class A4TVAdaptationAndTutorialDialogs {
                 // accepted
                 String recommendation = "";
                 if(experiencedUser){
-                    recommendation = "A aplicação recomenda usar o modo Avançado, aceita?";
+                    recommendation = "A aplicação recomenda usar o modo Conciso, aceita?";
                 }else{
-                    recommendation = "A aplicação recomenda usar o modo Básico, aceita?";
+                    recommendation = "A aplicação recomenda usar o modo Detalhado, aceita?";
                 }
                 createTutorialDialog6("Modo de Feedback", "É possível apresentar a informação do que se passa no ecrã da televisão de duas maneiras. O modo detalhado apresenta-lhe " +
                         "mais contexto sobre a interface da aplicação TV, como por exemplo, todas as opções existentes no menu onde se encontra. Por outro lado o modo conciso, remove essa informação" +

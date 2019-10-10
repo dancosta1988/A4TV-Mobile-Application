@@ -627,22 +627,22 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
                         "deseja aumentar a velocidade de leitura?", "configure_speed", newSpeed + "");
             } else if(readingMode == A4TVMobileClient.VERBOSE && (irActions || reLocalize)){
 
-                if(focusMode == A4TVMobileClient.FOCUS_SIBLINGS)
+                if(focusMode == A4TVMobileClient.FOCUS_MAP) {
                     dialogs.createAdaptationDialog("Sugestão", dialogText +
-                            " deseja experimentar outra versão do modo detalhado?", "focus_preference", A4TVMobileClient.FOCUS_MAP+"");
-                else
-                    dialogs.createAdaptationDialog("Sugestão", dialogText +
-                            " deseja experimentar outra versão do modo detalhado?", "focus_preference", A4TVMobileClient.FOCUS_SIBLINGS+"");
+                            " deseja experimentar outra versão do modo detalhado?", "focus_preference", A4TVMobileClient.FOCUS_SIBLINGS + "");
+                }
 
-            }else if(readingMode == A4TVMobileClient.VERBOSE && reReadScreen){
+
+            } else if(readingMode == A4TVMobileClient.VERBOSE && reReadScreen){
                 double newSpeed = (speechSpeed - 0.2);
                 if(newSpeed < 0)
                     newSpeed = 0;
                 dialogs.createAdaptationDialog("Sugestão", dialogText +
                         " deseja diminuir a velocidade de leitura?", "configure_speed", newSpeed + "").show();
-            }else if(readingMode == A4TVMobileClient.VERBOSE && quickScroll){
+
+            } else if(readingMode == A4TVMobileClient.VERBOSE && focusMode == A4TVMobileClient.FOCUS_MAP && quickScroll){
                 dialogs.createAdaptationDialog("Sugestão", dialogText +
-                        " deseja passar para o modo conciso?", "reading_preference", A4TVMobileClient.CONCISE + "");
+                        " deseja experimentar outra versão do modo detalhado?", "focus_preference", A4TVMobileClient.FOCUS_SIBLINGS + "");
             }
 
             getUserPreferences();
@@ -650,12 +650,17 @@ public class A4TVMainActivity extends AppCompatActivity implements View.OnClickL
         }else{
             System.err.println("No patterns found, suggest concise if verbose....sdad");
 
-            if(readingMode == A4TVMobileClient.VERBOSE){
+            if(readingMode == A4TVMobileClient.VERBOSE && focusMode == A4TVMobileClient.FOCUS_MAP){
                 dialogText = "A aplicação não detectou nenhuma dificuldade na utilização,";
                 dialogs.createAdaptationDialog("Sugestão", dialogText +
                         " deseja passar para o modo conciso?", "reading_preference", A4TVMobileClient.CONCISE + "");
                 getUserPreferences();
                 userInterfaceEventManager.addAction(Action.LONG_TERM_ADAPTATION_APPLIED, "-", "-", "-", "-", "-", readingMode + "." + focusMode, interactMode + "");
+
+            } else if(readingMode == A4TVMobileClient.VERBOSE && focusMode == A4TVMobileClient.FOCUS_SIBLINGS){
+                dialogText = "A aplicação não detectou nenhuma dificuldade na utilização,";
+                dialogs.createAdaptationDialog("Sugestão", dialogText +
+                        " deseja experimentar outra versão do modo detalhado?", "focus_preference", A4TVMobileClient.FOCUS_MAP + "");
             }
         }
 
